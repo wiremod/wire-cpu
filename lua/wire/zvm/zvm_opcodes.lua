@@ -1221,6 +1221,16 @@ ZVM.OpcodeTable[141] = function(self) --EXTRETPA
 end
 
 
+ZVM.OpcodeTable[150] = function(self) -- ERR
+    self:Dyn_Emit("$L P = $2")
+    self:Dyn_Emit("P = P * (10^math.floor(-math.log10(math.abs(P)+1e-12)-1))")
+    self:Dyn_Emit("VM:SignalError($1+P)")
+end
+
+ZVM.OpcodeTable[151] = function(self) -- CLERR
+    self:Dyn_Emit("VM:SignalError(0)")
+end
+
 --------------------------------------------------------------------------------
 ZVM.OpcodeTable[250] = function(self)  --VADD
   self:Dyn_Emit("if VM.VMODE == 2 then")
