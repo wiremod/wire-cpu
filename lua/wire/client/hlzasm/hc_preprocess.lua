@@ -47,27 +47,29 @@ function HCOMP:ParsePreprocessMacro(lineText,macroPosition)
       end
     end
     if macroName == "ifdef" or macroName == "ifndef" then
-    self.EndIfsToSkip = self.EndIfsToSkip + 1
+      self.EndIfsToSkip = self.EndIfsToSkip + 1
     end
     self:Warning("skipping to next macro after checking "..macroName)
     local InComment = false
-    for i = 0, 1024 do
+    -- If this while loop hits end of file before #endif it won't produce an error, seems like the original behavior for ifdefs
+    while self:getChar() ~= "" do
       if self:getChar() == '/' and not InComment then
         self:nextChar()
         if self:getChar() == '*' then
-        self:nextChar()
-        InComment = true
+          self:nextChar()
+          InComment = true
         end
       if self:getChar() == '*' then
         self:nextChar()
         if self:getChar() == '/' then
+          self:nextChar()
           InComment = false
         end
       end
       end
       if (self.Code[1].Col == 1) and (self:getChar() == "#") and not InComment then
-      self.Code[1].NextCharPos = self.Code[1].NextCharPos - 1 -- Exit to let tokenizer handle from here
-      break
+        self.Code[1].NextCharPos = self.Code[1].NextCharPos - 1 -- Exit to let tokenizer handle from here
+        break
       end
       self:nextChar()
     end
