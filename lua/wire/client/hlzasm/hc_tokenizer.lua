@@ -577,9 +577,10 @@ end
 
 -- Returns current position in source file
 function HCOMP:CurrentSourcePosition()
-  if self.Tokens[self.CurrentToken-1] then
-    return self.Tokens[self.CurrentToken-1].Position
-  else
-    return { Line = 1, Col = 1, File = "HL-ZASM" }
+  if self.CurrentToken ~= nil then
+    if self.Tokens[self.CurrentToken-1] then
+      return self.Tokens[self.CurrentToken-1].Position
+    end
   end
+    return { Line = 1, Col = 1, File = "HL-ZASM"}
 end
