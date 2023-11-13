@@ -231,7 +231,8 @@ function HCOMP:Tokenize() local TOKEN = self.TOKEN
   -- Read token position
   local tokenPosition = { Line = self.Code[1].Line,
                           Col  = self.Code[1].Col,
-                          File = self.Code[1].File }
+                          File = self.Code[1].File,
+                          ParentFile = self.Code[1].ParentFile }
 
   -- Check for end of file
   if self:getChar() == "" then
@@ -577,9 +578,12 @@ end
 
 -- Returns current position in source file
 function HCOMP:CurrentSourcePosition()
-  if self.Tokens[self.CurrentToken-1] then
-    return self.Tokens[self.CurrentToken-1].Position
-  else
-    return { Line = 1, Col = 1, File = "HL-ZASM" }
+  if self.CurrentToken then
+    if self.Tokens[self.CurrentToken-1] then
+      return self.Tokens[self.CurrentToken-1].Position
+    end
+  elseif self.FileName then
+      return { Line = 1, Col = 1, File = self.FileName, ParentFile = 'HL-ZASM'}
   end
+  return { Line = 1, Col = 1, File = "HL-ZASM", ParentFile = "HL-ZASM"}
 end
