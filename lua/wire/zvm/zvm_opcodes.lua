@@ -1222,8 +1222,7 @@ end
 
 
 ZVM.OpcodeTable[150] = function(self) -- STERR
-    self:Dyn_Emit("$L P = $2")
-    self:Dyn_Emit("P = P * (10^math.floor(-math.log10(math.abs(P)+1e-12)-1))")
+    self:Dyn_Emit("$L P = VM:MakeErrorCode($2)")
     self:Dyn_Emit("VM:SignalError(math.floor($1)+P)")
 end
 

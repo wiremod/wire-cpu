@@ -645,7 +645,9 @@ function ZVM:ExternalInterrupt(interruptNo)
 end
 
 
-
+function ZVM:MakeErrorCode(Code) 
+  return Code * (10^math.floor(-math.log10(math.abs(Code)+1e-12)-1))
+end
 
 --------------------------------------------------------------------------------
 function ZVM:Interrupt(interruptNo,interruptParameter,isExternal,cascadeInterrupt)
@@ -660,7 +662,7 @@ function ZVM:Interrupt(interruptNo,interruptParameter,isExternal,cascadeInterrup
   self.LADD = interruptParameter or self.XEIP
 
   -- Output an error externally
-  local fractionalParameter = self.LADD * (10^math.floor(-math.log10(math.abs(self.LADD)+1e-12)-1))
+  local fractionalParameter = self:MakeErrorCode(self.LADD)
   self:SignalError(fractionalParameter+interruptNo)
 
   -- Check if interrupts handling is enabled
