@@ -1222,8 +1222,7 @@ end
 
 
 ZVM.OpcodeTable[150] = function(self) -- STERR
-    self:Dyn_Emit("$L P = VM:MakeErrorCode($2)")
-    self:Dyn_Emit("VM:SignalError(math.floor($1)+P)")
+    self:Dyn_Emit("VM:SignalError(VM:MakeErrorCode($1,$2))")
 end
 
 ZVM.OpcodeTable[151] = function(self) -- CLERR
