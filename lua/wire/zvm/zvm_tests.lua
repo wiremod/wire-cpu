@@ -12,7 +12,9 @@ include("wire/client/hlzasm/hc_compiler.lua")
 ZVMTestSuite = {
 	TestFiles = {},
 	TestQueue = {},
-	TestStatuses = {}
+	TestStatuses = {},
+	Warnings = 0,
+	CurrentWarnings = 0
 }
 
 local testDirectory = "wire/zvm/tests"
@@ -63,19 +65,23 @@ function ZVMTestSuite.FinishTest(fail)
 	else
 		finalFail = fail
 	end
+	if ZVMTestSuite.CurrentWarnings > 0 then
+		print("Compiler Warnings from "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue].." "..ZVMTestSuite.CurrentWarnings)
+		ZVMTestSuite.CurrentWarnings = 0
+	end
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses+1] = finalFail -- auto fail on return nil
 	ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] = nil
-	local passed, failed = 0, 0
 	if #ZVMTestSuite.TestQueue > 0 then
 		timer.Simple(0.125,ZVMTestSuite.RunNextTest)
 	else
+		local passed, failed = 0, 0
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
 			if ZVMTestSuite.TestStatuses[ind] then
 				failed = failed + 1
 				MsgC(Color(255,0,0),"Error ",Color(255,255,255),"in "..i.."\n")
 			else
 				passed = passed + 1
-				MsgC(Color(0,255,0),i.." passed tests".."\n")
+				--MsgC(Color(0,255,0),i.." passed tests".."\n")
 			end
 		end
 		local passmod, errormod = "",""
@@ -85,7 +91,7 @@ function ZVMTestSuite.FinishTest(fail)
 		if failed > 1 then
 			errormod = "s"
 		end
-		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod)
+		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod.." Compiler Warnings: "..ZVMTestSuite.Warnings)
 	end
 end
 
@@ -108,7 +114,6 @@ function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
 	ZVMTestSuite.Initialize(curVM)
 	print("Running "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
-	ZVMTestSuite.AddVirtualFunctions(curVM)
 	include(testDirectory..'/'..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	CPUTest:RunTest(curVM,ZVMTestSuite)
 end
@@ -131,11 +136,15 @@ end
 
 function ZVMTestSuite.InternalSuccessCallback()
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
+	CPULib.print = ZVMTestSuite.oldCPUprint
+	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
 	ZVMTestSuite.CompileArgs.SuccessCallback()
 end
 
 function ZVMTestSuite.InternalErrorCallback()
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
+	CPULib.print = ZVMTestSuite.oldCPUprint
+	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
 	ZVMTestSuite.CompileArgs.ErrorCallback()
 end
 
@@ -143,6 +152,13 @@ function ZVMTestSuite.StartCompileInternal()
 	-- Swap loadfile function to load files from test folder
 	ZVMTestSuite.HCOMPLoadFile = HCOMP.LoadFile
 	HCOMP.LoadFile = ZVMTestSuite.LoadFile
+	ZVMTestSuite.oldCPUprint = CPULib.print
+	CPULib.print = function (...) end
+	ZVMTestSuite.OldHCOMPWarning = HCOMP.Warning
+	function HCOMP:Warning()
+		ZVMTestSuite.Warnings = ZVMTestSuite.Warnings + 1
+		ZVMTestSuite.CurrentWarnings = ZVMTestSuite.CurrentWarnings + 1
+	end
 	local SourceCode = ZVMTestSuite.CompileArgs.SourceCode
 	local FileName = ZVMTestSuite.CompileArgs.FileName
 	local SuccessCallback = ZVMTestSuite.CompileArgs.SuccessCallback
@@ -194,6 +210,9 @@ function ZVMTestSuite.CreateVirtualIOBus(IOBusSize)
 end
 
 function ZVMTestSuite.AddVirtualFunctions(VM)
+	function VM:ErrorCallback(errorcode)
+		return
+	end
 	function VM:FlashData(data)
 		ZVMTestSuite:FlashData(self,data)
 	end
@@ -205,6 +224,7 @@ function ZVMTestSuite.AddVirtualFunctions(VM)
 	end
 	function VM:SignalError(errorcode)
 		self.Error = errorcode
+		self.ErrorCallback(errorcode)
 	end
 end
 
@@ -307,14 +327,9 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 	VM.Frequency = 2000
 	-- Create virtual machine
 	VM.SerialNo = CPULib.GenerateSN("CPU")
+	ZVMTestSuite.AddVirtualFunctions(VM)
 	VM:Reset()
 
-	VM.SignalError = function(VM,errorCode)
-		Wire_TriggerOutput(VM, "Error", errorCode)
-	end
-	VM.SignalShutdown = function(VM)
-		VM.VMStopped = true
-	end
 	VM.ExternalWrite = function(VM,Address,Value)
 		if Address >= 0 then -- Use MemBus
 			local MemBusSource = Membus
