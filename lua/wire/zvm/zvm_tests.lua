@@ -96,7 +96,7 @@ function ZVMTestSuite.FinishTest(fail)
 end
 
 function ZVMTestSuite.Error(...)
-	local args = ...
+	local args = table.Pack(...)
 	MsgC(Color(255,0,0),"in file ",Color(255,255,255),ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue],Color(255,0,0)," Error: ")
 	if args ~= nil then
 		if istable(args) then

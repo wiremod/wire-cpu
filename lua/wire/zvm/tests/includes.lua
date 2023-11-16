@@ -18,7 +18,7 @@ function CPUTest.RunCPU()
 	if CPUTest.VM.R0 == 2 then
 		CPUTest.TestSuite.FinishTest(false)
 	else
-		print("R0 is not 2! R0 is "..tostring(CPUTest.VM.R0))
+		CPUTest.TestSuite.Error("R0 is not 2! R0 is "..tostring(CPUTest.VM.R0))
 		CPUTest.TestSuite.FinishTest(true)
 	end
 end
