@@ -62,6 +62,23 @@ function ZVMTestSuite.RunNextTest()
 end
 
 function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)
+	ZVMTestSuite.CompileArgs = {
+		SourceCode = SourceCode,
+		FileName = FileName,
+		SuccessCallback = SuccessCallback,
+		ErrorCallback = ErrorCallback,
+		TargetPlatform = TargetPlatform
+	}
+	-- Needs to delay next compile otherwise it'll halt, this will make it easier.
+	timer.Simple(0.125,ZVMTestSuite.StartCompileInternal)
+end
+
+function ZVMTestSuite.StartCompileInternal()
+	local SourceCode = ZVMTestSuite.CompileArgs.SourceCode
+	local FileName = ZVMTestSuite.CompileArgs.FileName
+	local SuccessCallback = ZVMTestSuite.CompileArgs.SuccessCallback
+	local ErrorCallback = ZVMTestSuite.CompileArgs.ErrorCallback
+	local TargetPlatform = ZVMTestSuite.CompileArgs.TargetPlatform
 	CPULib.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)
 end
 
@@ -72,12 +89,12 @@ end
 function ZVMTestSuite.CreateVirtualMemBus(MembusSize)
 	local virtualMemBus = {Size = MembusSize}
 	function virtualMemBus:ReadCell(Address)
-		if Address < self.Size and Address > -1 then
+		if Address <= self.Size and Address > -1 then
 			return virtualMemBus[Address]
 		end
 	end
 	function virtualMemBus:WriteCell(Address,Value)
-		if Address < self.Size and Address > -1 then
+		if Address <= self.Size and Address > -1 then
 			virtualMemBus[Address] = Value
 			return true
 		end
@@ -87,14 +104,14 @@ function ZVMTestSuite.CreateVirtualMemBus(MembusSize)
 end
 
 function ZVMTestSuite.CreateVirtualIOBus(IOBusSize)
-	local virtualIOBus = {InPorts = {},OutPorts = {}, Size = IOBusSize}
+	local virtualIOBus = {InPorts = {},OutPorts = {}, Size = IOBusSize-1}
 	function virtualIOBus:ReadCell(Address)
-		if Address < self.Size and Address > -1 then
+		if Address <= self.Size and Address > -1 then
 			return self.InPorts[Address]
 		end
 	end
 	function virtualIOBus:WriteCell(Address,Value)
-		if Address < self.Size and Address > -1 then
+		if Address <= self.Size and Address > -1 then
 			self.OutPorts[Address] = Value
 			return true
 		end
