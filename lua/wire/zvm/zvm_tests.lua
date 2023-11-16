@@ -39,16 +39,27 @@ function ZVMTestSuite.FinishTest(fail)
 	end
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses+1] = finalFail -- auto fail on return nil
 	ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] = nil
+	local passed, failed = 0, 0
 	if #ZVMTestSuite.TestQueue > 0 then
-		timer.Simple(0.25,ZVMTestSuite.RunNextTest)
+		timer.Simple(0.125,ZVMTestSuite.RunNextTest)
 	else
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
 			if ZVMTestSuite.TestStatuses[ind] then
+				failed = failed + 1
 				print("Error in "..i)
 			else
+				passed = passed + 1
 				print(i.." passed tests")
 			end
 		end
+		local passmod, errormod = "",""
+		if passed > 1 then
+			passmod = "s"
+		end
+		if failed > 1 then
+			errormod = "s"
+		end
+		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod)
 	end
 end
 
@@ -69,7 +80,7 @@ function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,
 		ErrorCallback = ErrorCallback,
 		TargetPlatform = TargetPlatform
 	}
-	-- Needs to delay next compile otherwise it'll halt, this will make it easier.
+	-- Needs to delay next compile otherwise it'll halt if a test compiles two or more programs.
 	timer.Simple(0.125,ZVMTestSuite.StartCompileInternal)
 end
 
@@ -128,7 +139,7 @@ function ZVMTestSuite.AddVirtualFunctions(VM)
 		ZVMTestSuite:Run(self)
 	end
 	function VM:TriggerInput(iname,name)
-		ZVMTestSuite(self,iname,name)
+		ZVMTestSuite.TriggerInput(self,iname,name)
 	end
 	function VM:SignalError(errorcode)
 		self.Error = errorcode
@@ -136,11 +147,15 @@ function ZVMTestSuite.AddVirtualFunctions(VM)
 end
 
 function ZVMTestSuite.FlashData(VM,data)
-	VM:Reset()
+	if VM.Reset then
+		VM:Reset()
+	end
 	for k,v in pairs(data) do
 		VM:WriteCell(k,tonumber(v) or 0)
-		if (k >= 0) and (k < VM.ROMSize) then
-			VM.ROM[k] = tonumber(v) or 0
+		if VM.ROMSize then
+			if (k >= 0) and (k < VM.ROMSize) then
+				VM.ROM[k] = tonumber(v) or 0
+			end
 		end
 	end
 end
@@ -297,7 +312,7 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 	local oldReset = VM.Reset
 	VM.Reset = function(...)
 		if VM.Clk and VM.VMStopped then
-			VM:NextThink(CurTime())
+			--VM:NextThink(CurTime())
 		end
 		VM.VMStopped = false
 		return oldReset(...)

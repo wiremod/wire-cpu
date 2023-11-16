@@ -10,7 +10,6 @@ end
 function CPUTest.CompileNext()
 	local buff = CPUTest.TestSuite.GetCompileBuffer()
 	local IOBus = CPUTest.TestSuite.CreateVirtualIOBus(#buff+1) -- create an IOBus large enough to hold this code
-	PrintTable(buff)
 	CPUTest.IOBus = IOBus
 	-- reverse the compiled code, the CPU will read them in reverse if it's in the IOBus
 	-- because CS will be negative, and IP only increments
