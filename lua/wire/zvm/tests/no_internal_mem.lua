@@ -22,13 +22,13 @@ function CPUTest.RunCPU()
 	if CPUTest.VM.R0 == 1 then
 		CPUTest.TestSuite.FinishTest(false)
 	else
-		print("CPU with no ram/rom failed to execute code from bus! R0 = "..CPUTest.VM.R0)
+		CPUTest.TestSuite.Error("CPU with no ram/rom failed to execute code from bus! R0 = "..CPUTest.VM.R0)
 		CPUTest.TestSuite.FinishTest(true)
 	end
 end
 
 function CPUTest.CompileError()
-	print('hit a compile time error')
+	CPUTest.TestSuite.Error('hit a compile time error')
 	CPUTest.TestSuite.FinishTest(true)
 end
 

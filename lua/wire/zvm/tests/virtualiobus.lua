@@ -22,20 +22,20 @@ function CPUTest.RunCPU()
 			if CPUTest.VM.R0 == 24 then
 				CPUTest.TestSuite.FinishTest(false)
 			else
-				print("CPU failed to read input port! R0 = "..CPUTest.VM.R0)
+				CPUTest.TestSuite.Error("CPU failed to read input port! R0 = "..CPUTest.VM.R0)
 				CPUTest.TestSuite.FinishTest(true)
 			end
 		else
-			print("CPU failed to write to output port! Port0 = "..IOBus.OutPorts[0])
+			CPUTest.TestSuite.Error("CPU failed to write to output port! Port0 = "..IOBus.OutPorts[0])
 		end
 	else
-		print("CPU wrote to input ports! "..tostring(IOBus:ReadCell(0)))
+		CPUTest.TestSuite.Error("CPU wrote to input ports! "..tostring(IOBus:ReadCell(0)))
 		CPUTest.TestSuite.FinishTest(true)
 	end
 end
 
 function CPUTest.CompileError()
-	print('hit a compile time error')
+	CPUTest.TestSuite.Error('hit a compile time error')
 	CPUTest.TestSuite.FinishTest(true)
 end
 

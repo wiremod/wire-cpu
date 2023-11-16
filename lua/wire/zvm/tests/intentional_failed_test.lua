@@ -16,13 +16,13 @@ function CPUTest.RunCPU()
 	if CPUTest.VM.R0 == 4095 then
 		CPUTest.TestSuite.FinishTest(false)
 	else
-		print("R0 is not 4095! R0 is "..tostring(CPUTest.VM.R0))
+		CPUTest.TestSuite.Error("R0 is not 4095! R0 is "..tostring(CPUTest.VM.R0))
 		CPUTest.TestSuite.FinishTest(true)
 	end
 end
 
 function CPUTest.CompileError()
-	print('hit a compile time error')
+	CPUTest.TestSuite.Error('hit a compile time error')
 	CPUTest.TestSuite.FinishTest(true)
 end
 

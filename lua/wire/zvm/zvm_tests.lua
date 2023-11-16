@@ -14,8 +14,9 @@ ZVMTestSuite = {
 	TestQueue = {},
 	TestStatuses = {}
 }
+
 local testDirectory = "wire/zvm/tests"
--- Make this dynamic, search directory under zvm/tests/ and run every lua in there
+
 function ZVMTestSuite.RunAll()
 	local files,directories = file.Find(testDirectory..'/*.lua',"LUA","nameasc")
 	ZVMTestSuite.TestFiles = files or {}
@@ -46,10 +47,10 @@ function ZVMTestSuite.FinishTest(fail)
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
 			if ZVMTestSuite.TestStatuses[ind] then
 				failed = failed + 1
-				print("Error in "..i)
+				MsgC(Color(255,0,0),"Error ",Color(255,255,255),"in "..i.."\n")
 			else
 				passed = passed + 1
-				print(i.." passed tests")
+				MsgC(Color(0,255,0),i.." passed tests".."\n")
 			end
 		end
 		local passmod, errormod = "",""
@@ -63,6 +64,21 @@ function ZVMTestSuite.FinishTest(fail)
 	end
 end
 
+function ZVMTestSuite.Error(...)
+	local args = ...
+	MsgC(Color(255,0,0),"in file ",Color(255,255,255),ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue],Color(255,0,0)," Error: ")
+	if args ~= nil then
+		if istable(args) then
+			for _,i in pairs(args) do
+				MsgC(Color(255,255,255),i)
+			end
+		else
+			MsgC(Color(255,255,255),tostring(args))
+		end
+	end
+	MsgC(Color(0,0,255),'\n')
+end
+
 function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
 	curVM.Frequency = 2000
@@ -70,6 +86,10 @@ function ZVMTestSuite.RunNextTest()
 	ZVMTestSuite.AddVirtualFunctions(curVM)
 	include(testDirectory..'/'..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	CPUTest:RunTest(curVM,ZVMTestSuite)
+end
+
+function ZVMTestSuite:LoadFile(FileName)
+	return file.Read('lua/'..testDirectory..'/'..FileName,"GAME")
 end
 
 function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)
@@ -84,13 +104,26 @@ function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,
 	timer.Simple(0.125,ZVMTestSuite.StartCompileInternal)
 end
 
+function ZVMTestSuite.InternalSuccessCallback()
+	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
+	ZVMTestSuite.CompileArgs.SuccessCallback()
+end
+
+function ZVMTestSuite.InternalErrorCallback()
+	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
+	ZVMTestSuite.CompileArgs.ErrorCallback()
+end
+
 function ZVMTestSuite.StartCompileInternal()
+	-- Swap loadfile function to load files from test folder
+	ZVMTestSuite.HCOMPLoadFile = HCOMP.LoadFile
+	HCOMP.LoadFile = ZVMTestSuite.LoadFile
 	local SourceCode = ZVMTestSuite.CompileArgs.SourceCode
 	local FileName = ZVMTestSuite.CompileArgs.FileName
 	local SuccessCallback = ZVMTestSuite.CompileArgs.SuccessCallback
 	local ErrorCallback = ZVMTestSuite.CompileArgs.ErrorCallback
 	local TargetPlatform = ZVMTestSuite.CompileArgs.TargetPlatform
-	CPULib.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)
+	CPULib.Compile(SourceCode,FileName,ZVMTestSuite.InternalSuccessCallback,ErrorCallback,TargetPlatform)
 end
 
 function ZVMTestSuite.GetCompileBuffer()

@@ -41,13 +41,13 @@ function CPUTest.RunCPU()
 		CPUTest.TestSuite.FinishTest(false)
 	else
 		PrintTable(CPUTest.IOBus)
-		print("R0 != 24, R0 = "..tostring(CPUTest.VM.R0))
+		CPUTest.TestSuite.Error("R0 != 24, R0 = "..tostring(CPUTest.VM.R0))
 		CPUTest.TestSuite.FinishTest(true)
 	end
 end
 
 function CPUTest.CompileError()
-	print('hit a compile time error')
+	CPUTest.TestSuite.Error('hit a compile time error')
 	CPUTest.TestSuite.FinishTest(true)
 end
 
