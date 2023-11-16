@@ -17,9 +17,34 @@ ZVMTestSuite = {
 
 local testDirectory = "wire/zvm/tests"
 
+function ZVMTestSuite.CMDRun(_,_,_,names)
+	ZVMTestSuite.TestFiles = {}
+	for filename in string.gmatch(names, '[^,]+') do
+		local files = file.Find('lua/'..testDirectory..'/'..filename..'.lua',"GAME")
+			for _,i in ipairs(files) do
+				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = i
+			end
+	end
+	if #ZVMTestSuite.TestFiles == 0 then
+		if names ~= nil then
+			if names ~= "" then
+				print("Didn't find any tests with name(s): "..names)
+				return
+			end
+		end
+		ZVMTestSuite.RunAll()
+	else
+		ZVMTestSuite.StartTesting()
+	end
+end
+
 function ZVMTestSuite.RunAll()
 	local files,directories = file.Find(testDirectory..'/*.lua',"LUA","nameasc")
 	ZVMTestSuite.TestFiles = files or {}
+	ZVMTestSuite.StartTesting()
+end
+
+function ZVMTestSuite.StartTesting()
 	ZVMTestSuite.TestQueue = {}
 	ZVMTestSuite.TestStatuses = {}
 	for ind,i in ipairs(ZVMTestSuite.TestFiles) do -- copy with reversed indexes so we can use cheap popping
@@ -357,4 +382,4 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 end
 
 
-concommand.Add("ZCPU_RUN_AUTO_TESTS",ZVMTestSuite.RunAll,nil,"runs zcpu tests")
+concommand.Add("ZCPU_RUN_TESTS",ZVMTestSuite.CMDRun,nil,"Runs ZCPU Tests, pass a comma delimited list to only run tests with those names\nExample: ZCPU_RUN_TESTS example,file_example\n\nRun without args to run all tests")
