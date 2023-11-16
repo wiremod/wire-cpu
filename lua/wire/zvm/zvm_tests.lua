@@ -66,7 +66,7 @@ function ZVMTestSuite.FinishTest(fail)
 		finalFail = fail
 	end
 	if ZVMTestSuite.CurrentWarnings > 0 then
-		print("Compiler Warnings from "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue].." "..ZVMTestSuite.CurrentWarnings)
+		print("Compiler Warnings from "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue]..": "..ZVMTestSuite.CurrentWarnings)
 		ZVMTestSuite.CurrentWarnings = 0
 	end
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses+1] = finalFail -- auto fail on return nil
@@ -91,7 +91,7 @@ function ZVMTestSuite.FinishTest(fail)
 		if failed > 1 then
 			errormod = "s"
 		end
-		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod.." Compiler Warnings: "..ZVMTestSuite.Warnings)
+		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod..", Compiler Warnings: "..ZVMTestSuite.Warnings)
 	end
 end
 
