@@ -106,7 +106,7 @@ end
 
 function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
-	curVM.Frequency = 2000
+	ZVMTestSuite.Initialize(curVM)
 	print("Running "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	ZVMTestSuite.AddVirtualFunctions(curVM)
 	include(testDirectory..'/'..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
@@ -306,7 +306,6 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 	VM.VMStopped = false -- whether the VM has halted itself (e.g. by running off the end of the program)
 	VM.Frequency = 2000
 	-- Create virtual machine
-	VM.VM = CPULib.VirtualMachine()
 	VM.SerialNo = CPULib.GenerateSN("CPU")
 	VM:Reset()
 
