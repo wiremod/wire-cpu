@@ -16,7 +16,8 @@ AddCSLuaFile("wire/zvm/zvm_core.lua")
 AddCSLuaFile("wire/zvm/zvm_features.lua")
 AddCSLuaFile("wire/zvm/zvm_opcodes.lua")
 AddCSLuaFile("wire/zvm/zvm_data.lua")
-
+AddCSLuaFile("wire/zvm/zvm_tests.lua")
+include("wire/zvm/zvm_tests.lua")
 
 AddCSLuaFile("wire/cpulib.lua")
 include("wire/cpulib.lua")
@@ -33,5 +34,3 @@ if CLIENT then
 	include("wire/client/hlzasm/hc_compiler.lua")
 end
 
-AddCSLuaFile("wire/zvm/zvm_tests.lua")
-include("wire/zvm/zvm_tests.lua")
