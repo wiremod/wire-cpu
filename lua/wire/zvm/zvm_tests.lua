@@ -20,6 +20,7 @@ ZVMTestSuite = {
 local testDirectory = "wire/zvm/tests"
 
 function ZVMTestSuite.CMDRun(_,_,_,names)
+	ZVMTestSuite.Warnings = 0
 	ZVMTestSuite.TestFiles = {}
 	for filename in string.gmatch(names, '[^,]+') do
 		local files = file.Find('lua/'..testDirectory..'/'..filename..'.lua',"GAME")
@@ -36,6 +37,7 @@ function ZVMTestSuite.CMDRun(_,_,_,names)
 		end
 		ZVMTestSuite.RunAll()
 	else
+		PrintTable(ZVMTestSuite.TestFiles)
 		ZVMTestSuite.StartTesting()
 	end
 end
@@ -53,7 +55,6 @@ function ZVMTestSuite.StartTesting()
 		ZVMTestSuite.TestQueue[(#ZVMTestSuite.TestFiles)+1-ind] = i
 	end
 	print(#ZVMTestSuite.TestFiles.." tests loaded")
-	PrintTable(ZVMTestSuite.TestFiles)
 	ZVMTestSuite.RunNextTest()
 	print("Game needs to be unpaused in order to run the tests (estimated time to completion "..((#ZVMTestSuite.TestQueue)*0.25).." seconds)")
 end
