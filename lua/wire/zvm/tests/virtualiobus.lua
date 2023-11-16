@@ -34,8 +34,7 @@ function CPUTest.RunCPU()
 	end
 end
 
-function CPUTest.CompileError()
-	CPUTest.TestSuite.Error('hit a compile time error')
+function CPUTest.CompileError(msg)
+	CPUTest.TestSuite.Error('hit a compile time error '..msg)
 	CPUTest.TestSuite.FinishTest(true)
 end
-

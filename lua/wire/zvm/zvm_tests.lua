@@ -130,6 +130,10 @@ function ZVMTestSuite.GetCompileBuffer()
 	return CPULib.Buffer
 end
 
+function ZVMTestSuite.GetCPUName()
+	return CPULib.CPUName
+end
+
 function ZVMTestSuite.CreateVirtualMemBus(MembusSize)
 	local virtualMemBus = {Size = MembusSize}
 	function virtualMemBus:ReadCell(Address)

@@ -14,4 +14,3 @@ end
 function CPUTest.CompileError()
 	CPUTest.TestSuite.FinishTest(false)
 end
-
