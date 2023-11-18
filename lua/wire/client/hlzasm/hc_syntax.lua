@@ -28,7 +28,7 @@ for i=0,15 do VectorSyntax.MATRIX[i+1] = {tostring(i)} end
 
 --------------------------------------------------------------------------------
 -- Compile an opcode (called after if self:MatchToken(TOKEN.OPCODE))
-function HCOMP:Opcode() local TOKEN = self.TOKEN
+function HCOMP:Opcode() local TOKEN,TOKENSET = self.TOKEN,self.TOKENSET
   local opcodeName = self.TokenData
   local opcodeNo = self.OpcodeNumber[self.TokenData]
   local operandCount = self.OperandCount[opcodeNo]
@@ -456,7 +456,7 @@ end
 
 --------------------------------------------------------------------------------
 -- Compile a variable/function. Returns corresponding labels
-function HCOMP:DefineVariable(isFunctionParam,isForwardDecl,isRegisterDecl,isStructMember) local TOKEN = self.TOKEN
+function HCOMP:DefineVariable(isFunctionParam,isForwardDecl,isRegisterDecl,isStructMember) local TOKEN,TOKENSET = self.TOKEN,self.TOKENSET
   local varType,varSize,isStruct
   if self:MatchToken(TOKEN.IDENT) then -- Define structure
     varType = self.TokenData
@@ -742,7 +742,7 @@ end
 
 --------------------------------------------------------------------------------
 -- Compile a single statement
-function HCOMP:Statement() local TOKEN = self.TOKEN
+function HCOMP:Statement() local TOKEN,TOKENSET = self.TOKEN,self.TOKENSET
   -- Parse code for absolute labels and define (LABEL:) 
   if self.CurrentToken == 1 then
 	while not(self:MatchToken(TOKEN.EOF)) do
@@ -828,6 +828,13 @@ function HCOMP:Statement() local TOKEN = self.TOKEN
       while self:MatchToken(TOKEN.REGISTER) or self:MatchToken(TOKEN.IDENT) do
         if self.TokenType == TOKEN.IDENT then
           if self.RegisterIdentities[self.TokenData] then
+            -- Don't error on catching a variable being used near a zap/preserve
+            if self:MatchToken(TOKENSET.OPERATORS) then
+              -- move back 2 tokens and then re-parse this
+              self:PreviousToken()
+              self:PreviousToken()
+              return self:Statement()
+            end
             if tokenType == TOKEN.PRESERVE then
               self:Error("Trying to preserve a register variable")
             end
@@ -840,10 +847,18 @@ function HCOMP:Statement() local TOKEN = self.TOKEN
               self:Error("Cannot zap ranges using register variables")
             end
           else
-            if tokenType == TOKEN.PRESERVE then
-              self:Error("Trying to preserve a variable")
+            -- Don't error on catching a variable being used near a zap/preserve
+            if self:MatchToken(TOKEN.DCOLON) or self:MatchToken(TOKENSET.OPERATORS) then
+              -- move back 2 tokens and then re-parse this
+              self:PreviousToken() 
+              self:PreviousToken()
+              return self:Statement()
+            else
+              if tokenType == TOKEN.PRESERVE then
+                self:Error("Trying to preserve a variable")
+              end
+              self:Error("Trying to zap a non register variable")
             end
-            self:Error("Trying to zap a non register variable")
           end
         end
         if self.TokenType == TOKEN.REGISTER then
