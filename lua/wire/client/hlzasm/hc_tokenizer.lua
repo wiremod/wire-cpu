@@ -172,6 +172,15 @@ HCOMP.TOKENSET.ASSIGNMENT = {
   HCOMP.TOKEN.EQLDIV
 }
 
+HCOMP.TOKENSET.VALUES = {
+  HCOMP.TOKEN.IDENT,
+  HCOMP.TOKEN.REGISTER,
+  HCOMP.TOKEN.SEGMENT,
+  HCOMP.TOKEN.LABEL,
+  HCOMP.TOKEN.NUMBER,
+  HCOMP.TOKEN.STRALLOC
+}
+
 -- Create lookup tables for faster parsing
 HCOMP.PARSER_LOOKUP = {}
 for symID,symList in pairs(HCOMP.TOKEN_TEXT) do
@@ -265,7 +274,7 @@ end
 
 --------------------------------------------------------------------------------
 -- Tokenize the code
-function HCOMP:Tokenize() local TOKEN = self.TOKEN
+function HCOMP:Tokenize() local TOKEN,TOKENSET = self.TOKEN,self.TOKENSET
   -- Skip whitespaces
   while (self:getChar() ==  " ") or
         (self:getChar() == "\t") or
@@ -383,7 +392,66 @@ function HCOMP:Tokenize() local TOKEN = self.TOKEN
       })
       return true
     else
-      token = self.Defines[token]
+      if self.Defines[token].Macro then
+        -- handle smart macro, modify code file
+        if not self.ParsingMacro then
+        -- Macros that use other macros will still get parsed
+        -- the above if statement just prevents them from parsing exponentially
+        local savedPosition = { Col = self.Code[1].Col, Line = self.Code[1].Line, File = self.Code[1].File, NextCharPos = self.Code[1].NextCharPos}
+        local maxTokensRequired = 0 -- Get the highest amount of arguments possibly needed to avoid overparsing
+        for ind,i in pairs(self.Macros[token]) do
+          if ind then 
+            if tonumber(ind) > maxTokensRequired then
+              maxTokensRequired = ind
+            end
+          end
+        end
+        -- because they're comma separated each arg is 2 tokens
+        self.ParsingMacro = true
+        local tokens,pos = self:TokenizeString(self.Code[1].Text:sub(self.Code[1].NextCharPos),(maxTokensRequired*2))
+        local prevTokens = self.Tokens
+        local prevCurToken = self.CurrentToken
+        -- Swap tokens out for the tokens from the string we just got the tokens from
+        -- and then read them with the compiler functions as if they were actual main token list
+        -- to cleanly retrieve our variables
+        self.CurrentToken = 1
+        self.Tokens = tokens
+        local args = {}
+        while self:MatchToken(TOKENSET.VALUES) do
+          local identData = self.TokenData
+          -- Cannot currently take segreg:reg right now?
+          if self.TokenType == TOKEN.REGISTER then
+            identData = self.RegisterName[identData]
+          elseif self.TokenType == TOKEN.SEGMENT then
+            identData = self.SegmentRegisterName[identData]
+          end
+          args[#args+1] = identData
+          if not self:MatchToken(TOKEN.COMMA) then
+            break
+          end
+        end
+        local endSlicePoint = pos[#args*2] -- because they're comma separated each arg is 2 tokens
+        self.CurrentToken = prevCurToken
+        self.Tokens = prevTokens
+        -- find macro with same # of args as we have right now under our name
+        local codestring = self.Macros[token][#args]
+        if not codestring then
+          self:Error("Couldn't find a macro named "..token.." taking "..#args.." arguments")
+        end
+        -- process code string
+        for i=#args,1,-1 do
+          codestring = string.gsub(codestring,"$"..i,args[i])
+        end
+        self.Code[1].Col = savedPosition.Col
+        self.Code[1].Line = savedPosition.Line
+        self.Code[1].Text = self.Code[1].Text:sub(1,self.Code[1].NextCharPos-(#token+1))..codestring..self.Code[1].Text:sub(self.Code[1].NextCharPos+endSlicePoint)
+        self.Code[1].NextCharPos = savedPosition.NextCharPos-(#token+1)
+        token = self.Defines[token].MacroValue
+        self.ParsingMacro = false
+      end
+      else
+        token = self.Defines[token].MacroValue
+      end
     end
   end
 
@@ -476,7 +544,35 @@ function HCOMP:Tokenize() local TOKEN = self.TOKEN
 end
 
 
-
+--------------------------------------------------------------------------------
+-- Hijacks compiler functions to get and return tokens inside of string, up to x tokens
+-- Also returns char positions of tokens in string
+function HCOMP:TokenizeString(str,limit)
+  local prevTokens = self.Tokens
+  local prevCurToken = self.CurrentToken
+  local prevCode = self.Code[1]
+  local tokenpositions = {}
+  self.Code[1] = {Col = 0, Line = 0, NextCharPos = 1, File = "tokenizer_internal", Text = str}
+  self.Tokens = {}
+  if limit then
+    for i=1,limit do 
+      tokenpositions[#tokenpositions+1] = self.Code[1].NextCharPos
+      if not self:Tokenize() then
+        break
+      end
+    end
+  else
+    tokenpositions[#tokenpositions+1] = self.Code[1].NextCharPos
+    while self:Tokenize() do
+      tokenpositions[#tokenpositions+1] = self.Code[1].NextCharPos
+    end
+  end
+  local tokens = self.Tokens
+  self.Code[1] = prevCode
+  self.Tokens = prevTokens
+  self.CurrentToken = prevCurToken
+  return tokens,tokenpositions
+end
 
 --------------------------------------------------------------------------------
 -- Print a string of tokens as an expression

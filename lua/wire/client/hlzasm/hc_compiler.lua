@@ -224,6 +224,7 @@ function HCOMP:StartCompile(sourceCode,fileName,writeByteCallback,writeByteCalle
   -- Code generation settings
   self.Settings.AutoBusyRegisters = false -- Automatically preserves or zaps a range of registers for all code leaves that are generated while this is enabled.
   self.Settings.AutoBusyRegisterRanges = {}
+  self.Settings.IncludeVectorMacros = {} -- Include macros for defining vector labels
   self.Settings.FixedSizeOutput = false -- Output fixed-size instructions
   self.Settings.SeparateDataSegment = false -- Puts all variables into separate data segment
   self.Settings.GenerateLibrary = false -- Generate precompiled library
@@ -266,9 +267,10 @@ function HCOMP:StartCompile(sourceCode,fileName,writeByteCallback,writeByteCalle
 
   -- All macros defined so far
   self.Defines = {}
-  self.Defines["__LINE__"] = 0
-  self.Defines["__FILE__"] = ""
+  self.Defines["__LINE__"] = {MacroValue = 0}
+  self.Defines["__FILE__"] = {MacroValue = ""}
   self.IFDEFLevel = {}
+  self.Macros = {}
   self.SkipToEndIf = false
   self.EndIfsToSkip = 0
 
@@ -316,6 +318,8 @@ function HCOMP:UnprotectedCompile()
       self.Code = nil
       self.SourceCode = nil
       self.Defines = nil
+      self.Macros = nil
+      self.ParsingMarco = nil
 
       -- Go to the first token
       self.CurrentToken = 1

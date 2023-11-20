@@ -94,6 +94,7 @@ local macroTable = {
   ["ENDIF"] = true,
   ["ELSE"] = true,
   ["UNDEF"] = true,
+  ["MACRO"] = true,
 }
 
 function EDITOR:CommentSelection(removecomment)

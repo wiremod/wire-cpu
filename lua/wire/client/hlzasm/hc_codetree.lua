@@ -288,7 +288,14 @@ function HCOMP:GenerateLeaf(leaf,needResult)
       if istable(leaf.Constant) then
         self:Warning("Trying to generate invalid code ("..self:PrintTokens(leaf.Constant)..")",leaf)
       elseif not leaf.ForceTemporary then
-        self:Warning("Trying to generate invalid code",leaf)
+        if leaf.UnknownOperationByLabel then
+          -- Stop warning on macro use
+          if not string.match(leaf.UnknownOperationByLabel.Name,"/* MACRO") then
+            self:Warning("Trying to generate invalid code",leaf)
+          end
+        else
+          self:Warning("Trying to generate invalid code",leaf)
+        end
       end
     end
     return

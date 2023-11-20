@@ -316,7 +316,7 @@ SegmentRegisterName[14] = "EDI"
 SegmentRegisterName[15] = "ESP"
 SegmentRegisterName[16] = "EBP"
 for reg=0,31 do SegmentRegisterName[17+reg] = "R"..reg end
-HCOMP.SegmentRegisterName = RegisterName
+HCOMP.SegmentRegisterName = SegmentRegisterName
 
 
 
