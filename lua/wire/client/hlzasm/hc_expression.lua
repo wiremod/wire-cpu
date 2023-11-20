@@ -101,6 +101,11 @@ function HCOMP:Expression_FunctionCall(label) local TOKEN = self.TOKEN
         table.insert(genLeaves,pushLeaf)
       end
       argumentCount = argumentCount + argumentExpression[argNo].Memory.CopySize-1
+    else
+      pushLeaf = self:NewLeaf()
+      pushLeaf.Opcode = "push"
+      pushLeaf.Operands[1] = argumentExpression[argNo]  
+      table.insert(genLeaves,pushLeaf)
     end
     else
       pushLeaf = self:NewLeaf()
