@@ -516,7 +516,9 @@ function HCOMP:DefineVariable(isFunctionParam,isForwardDecl,isRegisterDecl,isStr
         self:PreviousToken() -- LPAREN
         self:PreviousToken() -- Func Name
         self:PreviousToken() -- Type Name
-        self:MatchToken(TOKEN.IDENT) -- Type Name
+        if not self:MatchToken(TOKEN.IDENT) then
+          self:MatchToken(TOKEN.TYPE) -- If it's not an IDENT (struct/user defined) it should be a generic type
+        end
         local returnType = self.TokenData
         self:MatchToken(TOKEN.IDENT)
         local funcName = self.TokenData
