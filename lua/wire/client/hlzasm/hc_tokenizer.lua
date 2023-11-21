@@ -181,6 +181,7 @@ HCOMP.TOKENSET.VALUES = {
   HCOMP.TOKEN.STRALLOC
 }
 
+
 -- Create lookup tables for faster parsing
 HCOMP.PARSER_LOOKUP = {}
 for symID,symList in pairs(HCOMP.TOKEN_TEXT) do
