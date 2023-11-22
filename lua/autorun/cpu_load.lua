@@ -17,7 +17,7 @@ AddCSLuaFile("wire/zvm/zvm_features.lua")
 AddCSLuaFile("wire/zvm/zvm_opcodes.lua")
 AddCSLuaFile("wire/zvm/zvm_data.lua")
 
-if game.Singleplayer() then
+if game.SinglePlayer() then
 	AddCSLuaFile("wire/zvm/zvm_tests.lua")
 	include("wire/zvm/zvm_tests.lua")
 end
