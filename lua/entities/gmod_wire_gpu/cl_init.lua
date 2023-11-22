@@ -440,9 +440,7 @@ local function GPU_DrawHUD()
       local screenWidth = ScrW()
       local screenHeight = ScrH()
 
-      if math.min(1/30,CurTime() - (videoGPU.PreviousTime or 0)) > 0 then 
-        videoGPU:Draw()
-      end
+      videoGPU:Draw()
       videoGPU:RenderVertex(screenWidth,screenHeight)
     end
   end
