@@ -56,7 +56,6 @@ function ZVMTestSuite.StartTesting()
 	end
 	print(#ZVMTestSuite.TestFiles.." tests loaded")
 	ZVMTestSuite.RunNextTest()
-	print("Game needs to be unpaused in order to run the tests (estimated time to completion "..((#ZVMTestSuite.TestQueue)*0.25).." seconds)")
 end
 
 function ZVMTestSuite.FinishTest(fail)
@@ -73,7 +72,7 @@ function ZVMTestSuite.FinishTest(fail)
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses+1] = finalFail -- auto fail on return nil
 	ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] = nil
 	if #ZVMTestSuite.TestQueue > 0 then
-		timer.Simple(0.125,ZVMTestSuite.RunNextTest)
+		ZVMTestSuite.RunNextTest()
 	else
 		local passed, failed = 0, 0
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
@@ -131,30 +130,29 @@ function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,
 		ErrorCallback = ErrorCallback,
 		TargetPlatform = TargetPlatform
 	}
-	-- Needs to delay next compile otherwise it'll halt if a test compiles two or more programs.
-	timer.Simple(0.125,ZVMTestSuite.StartCompileInternal)
+	ZVMTestSuite.StartCompileInternal()
 end
 
 function ZVMTestSuite.InternalSuccessCallback()
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
-	CPULib.print = ZVMTestSuite.oldCPUprint
 	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
 	ZVMTestSuite.CompileArgs.SuccessCallback()
 end
 
 function ZVMTestSuite.InternalErrorCallback()
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
-	CPULib.print = ZVMTestSuite.oldCPUprint
 	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
 	ZVMTestSuite.CompileArgs.ErrorCallback()
+end
+
+function ZVMTestSuite.OnWriteByte(caller,address,data)
+	ZVMTestSuite.Buffer[address] = data
 end
 
 function ZVMTestSuite.StartCompileInternal()
 	-- Swap loadfile function to load files from test folder
 	ZVMTestSuite.HCOMPLoadFile = HCOMP.LoadFile
 	HCOMP.LoadFile = ZVMTestSuite.LoadFile
-	ZVMTestSuite.oldCPUprint = CPULib.print
-	CPULib.print = function (...) end
 	ZVMTestSuite.OldHCOMPWarning = HCOMP.Warning
 	function HCOMP:Warning()
 		ZVMTestSuite.Warnings = ZVMTestSuite.Warnings + 1
@@ -162,14 +160,27 @@ function ZVMTestSuite.StartCompileInternal()
 	end
 	local SourceCode = ZVMTestSuite.CompileArgs.SourceCode
 	local FileName = ZVMTestSuite.CompileArgs.FileName
-	local SuccessCallback = ZVMTestSuite.CompileArgs.SuccessCallback
-	local ErrorCallback = ZVMTestSuite.CompileArgs.ErrorCallback
+	local SuccessCallback = ZVMTestSuite.InternalSuccessCallback
+	local ErrorCallback = ZVMTestSuite.InternalErrorCallback
 	local TargetPlatform = ZVMTestSuite.CompileArgs.TargetPlatform
-	CPULib.Compile(SourceCode,FileName,ZVMTestSuite.InternalSuccessCallback,ErrorCallback,TargetPlatform)
+	ZVMTestSuite.Buffer = {}
+	HCOMP:StartCompile(SourceCode,FileName or "source",ZVMTestSuite.OnWriteByte,nil)
+	HCOMP.Settings.CurrentPlatform = "CPU"
+	local noError, anotherStep = true,true
+	local steps = 0
+	while noError and anotherStep do
+		noError,anotherStep = pcall(HCOMP.Compile,HCOMP)
+	end
+	if not noError then
+		return ErrorCallback(HCOMP.ErrorMessage or ("Internal error: "..result),HCOMP.ErrorPosition)
+	end
+	if not anotherStep then
+		return SuccessCallback()
+	end
 end
 
 function ZVMTestSuite.GetCompileBuffer()
-	return CPULib.Buffer
+	return ZVMTestSuite.Buffer
 end
 
 function ZVMTestSuite.GetCPUName()
