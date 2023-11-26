@@ -50,9 +50,9 @@ MOV R4,[EAX:0] // and any register can be used as a segment
 MOV R5,R0:0    // This does nothing
 
 /*
-LEA is currently the only instruction that uses a user defined segment
-outside of memory access, and it writes the value of segment+value
-to the left hand side, it is effectively the same as
+LEA is one of the few instructions that use a user defined segment
+outside of memory access, and it writes the value of the address used
+by a memory access to the left hand side, it is effectively the same as
 
 MOV EAX,R0 //(EAX is just a standin for an unused register)
 ADD EAX,DS //(or the segment explicitly defined instead of DS)
@@ -65,8 +65,8 @@ this code uses 6 bytes, where LEA uses:
 
 */ 
 
-LEA R6,R0    // This will put DS+R0 into R6 (data_pos+3)
-LEA R7,SS:R0 // This will put SS+R0 into R7(SS+3)
+LEA R6,[R0]    // This will put DS+R0 into R6 (data_pos+3)
+LEA R7,[SS:R0] // This will put SS+R0 into R7(SS+3)
 
 /*
 Wire your CPU to a memory device
