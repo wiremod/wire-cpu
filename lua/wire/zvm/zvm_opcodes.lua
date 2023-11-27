@@ -1231,13 +1231,8 @@ end
 
 --------------------------------------------------------------------------------
 ZVM.OpcodeTable[250] = function(self)  --VADD
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V1 = VM:ReadVector2f($1 + %s)",seg1code)
     self:Dyn_Emit("$L V2 = VM:ReadVector2f($2 + %s)",seg2code)
@@ -1255,13 +1250,8 @@ ZVM.OpcodeTable[250] = function(self)  --VADD
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[251] = function(self)  --VSUB
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V1 = VM:ReadVector2f($1 + %s)",seg1code)
     self:Dyn_Emit("$L V2 = VM:ReadVector2f($2 + %s)",seg2code)
@@ -1279,10 +1269,7 @@ ZVM.OpcodeTable[251] = function(self)  --VSUB
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[252] = function(self)  --VMUL
-  local seg1code = "0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V1 = VM:ReadVector2f($1 + %s)",seg1code)
     self:Dyn_Emit("$L V2 = $2")
@@ -1300,13 +1287,8 @@ ZVM.OpcodeTable[252] = function(self)  --VMUL
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[253] = function(self)  --VDOT
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V1 = VM:ReadVector2f($1 + %s)",seg1code)
     self:Dyn_Emit("$L V2 = VM:ReadVector2f($2 + %s)",seg2code)
@@ -1324,13 +1306,8 @@ ZVM.OpcodeTable[253] = function(self)  --VDOT
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[254] = function(self)  --VCROSS
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V1 = VM:ReadVector2f($1 + %s)",seg1code)
     self:Dyn_Emit("$L V2 = VM:ReadVector2f($2 + %s)",seg2code)
@@ -1348,13 +1325,8 @@ ZVM.OpcodeTable[254] = function(self)  --VCROSS
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[255] = function(self)  --VMOV
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V = VM:ReadVector2f($2 + %s)",seg2code)
     self:Dyn_EmitInterruptCheck()
@@ -1368,13 +1340,8 @@ ZVM.OpcodeTable[255] = function(self)  --VMOV
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[256] = function(self)  --VNORM
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V = VM:ReadVector2f($2 + %s)",seg2code)
     self:Dyn_EmitInterruptCheck()
@@ -1392,13 +1359,8 @@ ZVM.OpcodeTable[256] = function(self)  --VNORM
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[257] = function(self)  --VCOLORNORM
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L V = VM:ReadVector4f($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
   self:Dyn_Emit("V.x = math.min(255,math.max(0,V.x))")
@@ -1416,13 +1378,8 @@ ZVM.OpcodeTable[259] = function(self)  --LOOPXY
 end
 --------------------------------------------------------------------------------
 ZVM.OpcodeTable[260] = function(self)  --MADD
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L M1 = VM:ReadMatrix($1 + %s)",seg1code)
   self:Dyn_Emit("$L M2 = VM:ReadMatrix($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
@@ -1434,13 +1391,8 @@ ZVM.OpcodeTable[260] = function(self)  --MADD
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[261] = function(self)   --MSUB
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L M1 = VM:ReadMatrix($1 + %s)",seg1code)
   self:Dyn_Emit("$L M2 = VM:ReadMatrix($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
@@ -1452,13 +1404,8 @@ ZVM.OpcodeTable[261] = function(self)   --MSUB
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[262] = function(self)   --MMUL
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L M1 = VM:ReadMatrix($1 + %s)",seg1code)
   self:Dyn_Emit("$L M2 = VM:ReadMatrix($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
@@ -1477,13 +1424,8 @@ ZVM.OpcodeTable[262] = function(self)   --MMUL
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[263] = function(self)   --MROTATE
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L VEC = VM:ReadVector4f($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
 
@@ -1524,13 +1466,8 @@ ZVM.OpcodeTable[263] = function(self)   --MROTATE
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[264] = function(self)   --MSCALE
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L VEC = VM:ReadVector3f($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
 
@@ -1559,13 +1496,8 @@ ZVM.OpcodeTable[264] = function(self)   --MSCALE
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[265] = function(self)   --MPERSPECTIVE
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L VEC = VM:ReadVector4f($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
 
@@ -1599,13 +1531,8 @@ ZVM.OpcodeTable[265] = function(self)   --MPERSPECTIVE
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[266] = function(self)   --MTRANSLATE
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L VEC = VM:ReadVector3f($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
 
@@ -1634,13 +1561,8 @@ ZVM.OpcodeTable[266] = function(self)   --MTRANSLATE
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[267] = function(self)   --MLOOKAT
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L EYE    = VM:ReadVector3f($2 + %s+0",seg2code)
   self:Dyn_Emit("$L CENTER = VM:ReadVector3f($2 + %s+3",seg2code)
   self:Dyn_Emit("$L UP     = VM:ReadVector3f($2 + %s+6",seg2code)
@@ -1698,26 +1620,16 @@ ZVM.OpcodeTable[267] = function(self)   --MLOOKAT
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[268] = function(self)   --MMOV
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("$L M = VM:ReadMatrix($2 + %s)",seg2code)
   self:Dyn_EmitInterruptCheck()
   self:Dyn_Emit("VM:WriteMatrix($1 + %s,M)",seg1code)
   self:Dyn_EmitInterruptCheck()
 end
 ZVM.OpcodeTable[269] = function(self)   --VLEN
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V = VM:ReadVector2f($2 + %s)",seg2code)
     self:Dyn_EmitInterruptCheck()
@@ -1747,10 +1659,7 @@ ZVM.OpcodeTable[273] = function(self)   --VMODE
 end
 --------------------------------------------------------------------------------
 ZVM.OpcodeTable[295] = function(self)  --VDIV
-  local seg1code = "0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
   self:Dyn_Emit("$L SCALAR = $2")
   self:Dyn_Emit("if VM.VMODE == 2 then")
     self:Dyn_Emit("$L V = VM:ReadVector2f($1 + %s)",seg1code)
@@ -1770,13 +1679,8 @@ ZVM.OpcodeTable[295] = function(self)  --VDIV
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[296] = function(self)  --VTRANSFORM
-  local seg1code,seg2code = "0","0"
-  if not self.EmitOperandSegment[1] then
-    seg1code = "VM.DS"
-  end
-  if not self.EmitOperandSegment[2] then
-    seg2code = "VM.DS"
-  end
+  local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
+  local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
   self:Dyn_Emit("local address_1 = $1 + $s",seg1code)
   self:Dyn_Emit("local address_2 = $2 + %s",seg2code)
   self:Dyn_Emit [[
