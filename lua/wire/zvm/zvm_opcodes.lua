@@ -337,6 +337,7 @@ ZVM.OpcodeTable[45] = function(self)  --CLP
   self:Dyn_Emit("VM.PF = 0")
 end
 ZVM.OpcodeTable[46] = function(self)  --STD
+    -- TODO: Remove microcode debugging, it's not possible to access normally.
   if self.MicrocodeDebug then
     self:Dyn_Emit("VM.Debug = true")
   end
@@ -1170,6 +1171,7 @@ ZVM.OpcodeTable[137] = function(self)  --EXTRETP
   self.OpcodeTable[110](self) -- as EXTRET
 end
 ZVM.OpcodeTable[139] = function(self)  --CLD
+    -- TODO: Remove microcode debugging, it's not possible to access normally.
   if self.MicrocodeDebug then
     self:Dyn_Emit("VM.Debug = false")
   end
