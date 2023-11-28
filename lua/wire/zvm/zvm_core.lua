@@ -27,6 +27,7 @@ include("wire/zvm/zvm_data.lua")
 if ZVM.MicrocodeDebug then -- Debug microcode generator
   local pad = 0
   function ZVM:Emit(text)
+    -- TODO: Remove microcode debugging, it's not possible to access normally.
     if string.find(text,"end") and (not string.find(text,"if"))
     then pad = pad - 1 end
 
@@ -318,7 +319,7 @@ function ZVM:Dyn_EndBlock()
     self:Dyn_EmitState()
     self:Dyn_EmitBreak(true)
   end
-
+  -- TODO: Remove microcode debugging, it's not possible to access normally.
   if self.MicrocodeDebug then
     if Msg then
       local str = self.EmitBlock
