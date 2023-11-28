@@ -4,6 +4,7 @@
 -- Virtual machine implementation core
 --------------------------------------------------------------------------------
 ZVM = {}
+-- TODO: Remove microcode debugging, it's not possible to access normally.
 if not SERVER and not CLIENT then
   ZVM.MicrocodeDebug = true
 end
