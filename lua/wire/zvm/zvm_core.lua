@@ -269,7 +269,7 @@ function ZVM:Dyn_EmitInterrupt(intNo,intParam)
   self:Dyn_EmitState()
   self:Emit("VM.IP = %d",(self.PrecompileIP or 0))
   self:Emit("VM.XEIP = %d",(self.PrecompileTrueXEIP or 0))
-  self:Dyn_Emit("VM:Interrupt(%d,%d)",intNo,intParam)
+  self:Dyn_Emit("VM:Interrupt(%s,%s)",intNo,intParam)
   self:Dyn_EmitBreak()
 end
 
