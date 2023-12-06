@@ -265,6 +265,8 @@ end
 
 --------------------------------------------------------------------------------
 -- Emit interrupt call
+-- intNo can only be numeric or "$1"
+-- intParam can only be numeric or "IDX"
 function ZVM:Dyn_EmitInterrupt(intNo,intParam)
   self:Dyn_EmitState()
   self:Emit("VM.IP = %d",(self.PrecompileIP or 0))
