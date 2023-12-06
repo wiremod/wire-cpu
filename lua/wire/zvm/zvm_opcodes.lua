@@ -238,7 +238,7 @@ ZVM.OpcodeTable[29] = function(self)  --CPG
   self:Dyn_Emit("$L PAGE = VM:GetPageByIndex(IDX)")
   self:Dyn_EmitInterruptCheck()
 
-  self:Dyn_Emit("if VM.CurrentPage.RunLevel <= VM.Page[IDX].RunLevel then")
+  self:Dyn_Emit("if VM.CurrentPage.RunLevel <= PAGE.RunLevel then")
     self:Dyn_Emit("PAGE.Read = 1")
     self:Dyn_Emit("PAGE.Write = 1")
     self:Dyn_Emit("VM:SetPageByIndex(IDX)")
