@@ -11,10 +11,10 @@ local ignored_dirs = {
 local function ReadDir(root)
 	if ignored_dirs[root] then return nil end
 	local tab = {}
-	local files,dirs = file.Find("addons/wire-cpu/data/"..root.."*","GAME")
+	local files,dirs = file.Find("addons/wire-cpu/data_static/"..root.."*","GAME")
 	for _, f in pairs(files) do
 		f = root..f
-		tab[f] = file.Read("addons/wire-cpu/data/"..f, "GAME")
+		tab[f] = file.Read("addons/wire-cpu/data_static/"..f, "GAME")
 	end
 	for _, f in pairs(dirs) do
 		f = root..f.."/"
@@ -30,7 +30,9 @@ end
 local function WriteDir(tab)
 	for f, contents in pairs(tab) do
 		if isstring(contents) then
-			file.Write(f, contents)
+			if not file.Exists(f,"DATA") then
+				file.Write(f, contents)
+			end
 		else
 			file.CreateDir(f)
 			WriteDir(contents)
@@ -38,12 +40,7 @@ local function WriteDir(tab)
 	end
 end
 
--- Write the files to the data folder anyway, in case they get changed.
+-- Write any missing files to the folder
 if CLIENT then
-	local compressed = file.Read("wire/cpu_default_data_files.lua","LUA")
-	-- The client cannot read lua files sent by the server (for security?), so clientside this'll only work
-	-- if the client actually has Wiremod installed, though with workshop autodownload that'll be common
-	if compressed ~= nil then
-		WriteDir(util.JSONToTable(string.sub(compressed, 3)))
-	end
+	WriteDir(ReadDir(""), 3)
 end
