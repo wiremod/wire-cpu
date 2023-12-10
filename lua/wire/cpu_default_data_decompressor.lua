@@ -24,7 +24,7 @@ local function ReadDir(root)
 end
 
 -- Uncomment and Rename this file to wire/lua/wire/default_data_files.lua to update it
--- file.Write("cpu_default_data_files.txt", "//"..util.TableToJSON(ReadDir("")))
+-- file.Write("cpu_default_data_files.txt", "--"..util.TableToJSON(ReadDir("")))
 
 -- Decompress the json string wire/lua/wire/default_data_files.lua into the corresponding 36+ default data files
 local function WriteDir(tab)
@@ -38,8 +38,8 @@ local function WriteDir(tab)
 	end
 end
 
--- Only expand the files if they aren't present already
-if CLIENT and not file.Exists("cpuchip/examples/helloworld.txt", "DATA") then
+-- Write the files to the data folder anyway, in case they get changed.
+if CLIENT then
 	local compressed = file.Read("wire/cpu_default_data_files.lua","LUA")
 	-- The client cannot read lua files sent by the server (for security?), so clientside this'll only work
 	-- if the client actually has Wiremod installed, though with workshop autodownload that'll be common
