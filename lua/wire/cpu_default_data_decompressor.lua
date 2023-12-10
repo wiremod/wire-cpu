@@ -7,6 +7,12 @@ local ignored_dirs = {
 	["spuchip/tests"] = true
 }
 
+local checked_dirs = {
+	"cpuchip",
+	"gpuchip",
+	"spuchip"
+}
+
 -- Compress all files in addons/wire/data recursively into 1 json string
 local function ReadDir(root)
 	if ignored_dirs[root] then return nil end
@@ -42,5 +48,7 @@ end
 
 -- Write any missing files to the folder
 if CLIENT then
-	WriteDir(ReadDir(""), 3)
+	for _,dir in pairs(checked_dirs) do
+		WriteDir(ReadDir(dir..'/'), 3)
+	end
 end
