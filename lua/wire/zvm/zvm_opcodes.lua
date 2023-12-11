@@ -550,7 +550,6 @@ ZVM.OpcodeTable[78] = function(self)  --MCOPY
     self:Dyn_EmitInterruptCheck()
     self:Dyn_BeginQuotaOnlyCode()
         self:Dyn_Emit("VM.MCOPYWrapUpCount = math.Clamp($1,0,8192)-i")
-        self:Dyn_Emit("print(VM.MCOPYWrapUpCount)")
     self:Dyn_EndQuotaOnlyCode()
     self:Dyn_Emit("EDI = EDI + 1")
     self:Dyn_Emit("ESI = ESI + 1")
