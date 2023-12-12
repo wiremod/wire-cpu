@@ -19,19 +19,19 @@ ZVMTestSuite = {
 
 local testDirectory = "wire/zvm/tests"
 
-function ZVMTestSuite.CMDRun(_,_,_,names)
+function ZVMTestSuite.CMDRun(_, _, _, names)
 	ZVMTestSuite.Warnings = 0
 	ZVMTestSuite.TestFiles = {}
 	for filename in string.gmatch(names, "[^,]+") do
-		local files = file.Find("lua/"..testDirectory.."/"..filename..".lua","GAME")
-			for _,i in ipairs(files) do
+		local files = file.Find("lua/" .. testDirectory .. "/" .. filename .. ".lua", "GAME")
+			for _, i in ipairs(files) do
 				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = i
 			end
 	end
 	if #ZVMTestSuite.TestFiles == 0 then
 		if names ~= nil then
 			if names ~= "" then
-				print("Didn't find any tests with name(s): "..names)
+				print("Didn't find any tests with name(s): " .. names)
 				return
 			end
 		end
@@ -43,7 +43,7 @@ function ZVMTestSuite.CMDRun(_,_,_,names)
 end
 
 function ZVMTestSuite.RunAll()
-	local files,directories = file.Find(testDirectory.."/*.lua","LUA","nameasc")
+	local files,directories = file.Find(testDirectory .. "/*.lua", "LUA", "nameasc")
 	ZVMTestSuite.TestFiles = files or {}
 	ZVMTestSuite.StartTesting()
 end
@@ -51,10 +51,10 @@ end
 function ZVMTestSuite.StartTesting()
 	ZVMTestSuite.TestQueue = {}
 	ZVMTestSuite.TestStatuses = {}
-	for ind,i in ipairs(ZVMTestSuite.TestFiles) do -- copy with reversed indexes so we can use cheap popping
+	for ind, i in ipairs(ZVMTestSuite.TestFiles) do -- copy with reversed indexes so we can use cheap popping
 		ZVMTestSuite.TestQueue[(#ZVMTestSuite.TestFiles)+1-ind] = i
 	end
-	print(#ZVMTestSuite.TestFiles.." tests loaded")
+	print(#ZVMTestSuite.TestFiles .. " tests loaded")
 	ZVMTestSuite.RunNextTest()
 end
 
@@ -66,10 +66,10 @@ function ZVMTestSuite.FinishTest(fail)
 		finalFail = fail
 	end
 	if ZVMTestSuite.CurrentWarnings > 0 then
-		print("Compiler Warnings from "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue]..": "..ZVMTestSuite.CurrentWarnings)
+		print("Compiler Warnings from " .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] .. ": " .. ZVMTestSuite.CurrentWarnings)
 		ZVMTestSuite.CurrentWarnings = 0
 	end
-	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses+1] = finalFail -- auto fail on return nil
+	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses + 1] = finalFail -- auto fail on return nil
 	ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] = nil
 	if #ZVMTestSuite.TestQueue > 0 then
 		ZVMTestSuite.RunNextTest()
@@ -78,10 +78,9 @@ function ZVMTestSuite.FinishTest(fail)
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
 			if ZVMTestSuite.TestStatuses[ind] then
 				failed = failed + 1
-				MsgC(Color(255,0,0),"Error ",Color(255,255,255),"in "..i.."\n")
+				MsgC(Color(255,0,0), "Error ", Color(255,255,255), "in " .. i .. "\n")
 			else
 				passed = passed + 1
-				--MsgC(Color(0,255,0),i.." passed tests".."\n")
 			end
 		end
 		local passmod, errormod = "",""
@@ -91,38 +90,38 @@ function ZVMTestSuite.FinishTest(fail)
 		if failed > 1 then
 			errormod = "s"
 		end
-		print(failed.." Failed test"..errormod..", "..passed.." Passed test"..passmod..", Compiler Warnings: "..ZVMTestSuite.Warnings)
+		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. ZVMTestSuite.Warnings .. "Compiler Warnings were generated")
 	end
 end
 
 function ZVMTestSuite.Error(...)
 	local args = table.Pack(...)
-	MsgC(Color(255,0,0),"in file ",Color(255,255,255),ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue],Color(255,0,0)," Error: ")
+	MsgC(Color(255,0,0), "in file ", Color(255,255,255), ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue], Color(255,0,0), " Error: ")
 	if args ~= nil then
 		if istable(args) then
-			for _,i in pairs(args) do
-				MsgC(Color(255,255,255),i)
+			for _, i in pairs(args) do
+				MsgC(Color(255,255,255), i)
 			end
 		else
-			MsgC(Color(255,255,255),tostring(args))
+			MsgC(Color(255,255,255), tostring(args))
 		end
 	end
-	MsgC(Color(0,0,255),"\n")
+	MsgC(Color(0,0,255), "\n")
 end
 
 function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
 	ZVMTestSuite.Initialize(curVM)
-	print("Running "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
-	include(testDirectory.."/"..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
+	print("Running " .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
+	include(testDirectory .. "/" .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	CPUTest:RunTest(curVM,ZVMTestSuite)
 end
 
 function ZVMTestSuite:LoadFile(FileName)
-	return file.Read("lua/"..testDirectory.."/"..FileName,"GAME")
+	return file.Read("lua/" .. testDirectory .. "/" .. FileName, "GAME")
 end
 
-function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)
+function ZVMTestSuite.Compile(SourceCode, FileName, SuccessCallback, ErrorCallback, TargetPlatform)
 	ZVMTestSuite.CompileArgs = {
 		SourceCode = SourceCode,
 		FileName = FileName,
@@ -164,15 +163,15 @@ function ZVMTestSuite.StartCompileInternal()
 	local ErrorCallback = ZVMTestSuite.InternalErrorCallback
 	local TargetPlatform = ZVMTestSuite.CompileArgs.TargetPlatform
 	ZVMTestSuite.Buffer = {}
-	HCOMP:StartCompile(SourceCode,FileName or "source",ZVMTestSuite.OnWriteByte,nil)
+	HCOMP:StartCompile(SourceCode, FileName or "source", ZVMTestSuite.OnWriteByte, nil)
 	HCOMP.Settings.CurrentPlatform = "CPU"
-	local noError, anotherStep = true,true
+	local noError, anotherStep = true, true
 	local steps = 0
 	while noError and anotherStep do
-		noError,anotherStep = pcall(HCOMP.Compile,HCOMP)
+		noError,anotherStep = pcall(HCOMP.Compile, HCOMP)
 	end
 	if not noError then
-		return ErrorCallback(HCOMP.ErrorMessage or ("Internal error: "..result),HCOMP.ErrorPosition)
+		return ErrorCallback(HCOMP.ErrorMessage or ("Internal error: " .. result), HCOMP.ErrorPosition)
 	end
 	if not anotherStep then
 		return SuccessCallback()
@@ -205,7 +204,11 @@ function ZVMTestSuite.CreateVirtualMemBus(MembusSize)
 end
 
 function ZVMTestSuite.CreateVirtualIOBus(IOBusSize)
-	local virtualIOBus = {InPorts = {},OutPorts = {}, Size = IOBusSize-1}
+	local virtualIOBus = {
+		InPorts = {},
+		OutPorts = {},
+		Size = IOBusSize-1
+	}
 	function virtualIOBus:ReadCell(Address)
 		if Address <= self.Size and Address > -1 then
 			return self.InPorts[Address]
@@ -408,4 +411,4 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 end
 
 
-concommand.Add("ZCPU_RUN_TESTS",ZVMTestSuite.CMDRun,nil,"Runs ZCPU Tests, pass a comma delimited list to only run tests with those names\nExample: ZCPU_RUN_TESTS example,file_example\n\nRun without args to run all tests")
+concommand.Add("ZCPU_RUN_TESTS", ZVMTestSuite.CMDRun, nil, "Runs ZCPU Tests, pass a comma delimited list to only run tests with those names\nExample: ZCPU_RUN_TESTS example,file_example\n\nRun without args to run all tests")

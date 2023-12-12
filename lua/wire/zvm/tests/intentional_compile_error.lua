@@ -3,7 +3,7 @@ CPUTest = {}
 function CPUTest:RunTest(VM,TestSuite)
 	CPUTest.VM = VM
 	CPUTest.TestSuite = TestSuite
-	TestSuite.Compile("MOV R0,",nil,CPUTest.RunCPU,CPUTest.CompileError)
+	TestSuite.Compile("MOV R0,", nil, CPUTest.RunCPU, CPUTest.CompileError)
 end
 
 function CPUTest.RunCPU()
