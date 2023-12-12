@@ -10,6 +10,7 @@ include("wire/client/hlzasm/hc_compiler.lua")
 
 local color_white = Color(255,255,255)
 local color_red = Color(255,0,0)
+local color_blue = Color(0,0,255)
 
 ZVMTestSuite = {
 	TestFiles = {},
@@ -30,13 +31,11 @@ function ZVMTestSuite.CMDRun(_, _, _, names)
 				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = i
 			end
 	end
-	if #ZVMTestSuite.TestFiles == 0 then
-		if names ~= nil then
+	if #ZVMTestSuite.TestFiles == 0 and names ~= nil then
 			if names ~= "" then
 				print("Didn't find any tests with name(s): " .. names)
 				return
 			end
-		end
 		ZVMTestSuite.RunAll()
 	else
 		PrintTable(ZVMTestSuite.TestFiles)
@@ -85,7 +84,7 @@ function ZVMTestSuite.FinishTest(fail)
 				passed = passed + 1
 			end
 		end
-		local passmod, errormod, warnstring = "","",""
+		local passmod, errormod, warnstring = "", "", ""
 		if passed ~= 1 then
 			passmod = "s"
 		end
@@ -111,7 +110,7 @@ function ZVMTestSuite.Error(...)
 			MsgC(color_white, tostring(args))
 		end
 	end
-	MsgC(Color(0,0,255), "\n")
+	MsgC(color_blue, "\n")
 end
 
 function ZVMTestSuite.RunNextTest()
@@ -138,7 +137,7 @@ function ZVMTestSuite.Compile(SourceCode, FileName, SuccessCallback, ErrorCallba
 end
 
 function ZVMTestSuite.InternalSuccessCallback()
-	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
+	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile
 	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
 	ZVMTestSuite.CompileArgs.SuccessCallback()
 end

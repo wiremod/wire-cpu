@@ -9,7 +9,7 @@ end
 function CPUTest.RunCPU()
 	CPUTest.TestSuite.FlashData(CPUTest.VM, CPUTest.TestSuite.GetCompileBuffer()) -- upload compiled to virtual cpu
 	CPUTest.VM.Clk = 1
-	for i=0,4096 do
+	for i = 0, 4096 do
 		CPUTest.VM:RunStep()
 	end
 	-- False = no error, True = error

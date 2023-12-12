@@ -53,7 +53,7 @@ function CPUTest.LogResults()
 end
 
 function CPUTest.CompareResults()
-	local fail,results1,results2 = false, {}, {}
+	local fail, results1, results2 = false, {}, {}
 	for ind, i in ipairs(CPUTest.ExpectedVariations1) do
 		if CPUTest.ResultVariations1[ind] == "Test " .. i then
 				results1[ind] = true
