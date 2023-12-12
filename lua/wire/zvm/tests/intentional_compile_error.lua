@@ -7,7 +7,7 @@ function CPUTest:RunTest(VM,TestSuite)
 end
 
 function CPUTest.RunCPU()
-	CPUTest.TestSuite.Error('Compiler did not error when it should have!')
+	CPUTest.TestSuite.Error("Compiler did not error when it should have!")
 	CPUTest.TestSuite.FinishTest(true)
 end
 

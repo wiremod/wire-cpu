@@ -22,8 +22,8 @@ local testDirectory = "wire/zvm/tests"
 function ZVMTestSuite.CMDRun(_,_,_,names)
 	ZVMTestSuite.Warnings = 0
 	ZVMTestSuite.TestFiles = {}
-	for filename in string.gmatch(names, '[^,]+') do
-		local files = file.Find('lua/'..testDirectory..'/'..filename..'.lua',"GAME")
+	for filename in string.gmatch(names, "[^,]+") do
+		local files = file.Find("lua/"..testDirectory.."/"..filename..".lua","GAME")
 			for _,i in ipairs(files) do
 				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = i
 			end
@@ -43,7 +43,7 @@ function ZVMTestSuite.CMDRun(_,_,_,names)
 end
 
 function ZVMTestSuite.RunAll()
-	local files,directories = file.Find(testDirectory..'/*.lua',"LUA","nameasc")
+	local files,directories = file.Find(testDirectory.."/*.lua","LUA","nameasc")
 	ZVMTestSuite.TestFiles = files or {}
 	ZVMTestSuite.StartTesting()
 end
@@ -107,19 +107,19 @@ function ZVMTestSuite.Error(...)
 			MsgC(Color(255,255,255),tostring(args))
 		end
 	end
-	MsgC(Color(0,0,255),'\n')
+	MsgC(Color(0,0,255),"\n")
 end
 
 function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
 	ZVMTestSuite.Initialize(curVM)
 	print("Running "..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
-	include(testDirectory..'/'..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
+	include(testDirectory.."/"..ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	CPUTest:RunTest(curVM,ZVMTestSuite)
 end
 
 function ZVMTestSuite:LoadFile(FileName)
-	return file.Read('lua/'..testDirectory..'/'..FileName,"GAME")
+	return file.Read("lua/"..testDirectory.."/"..FileName,"GAME")
 end
 
 function ZVMTestSuite.Compile(SourceCode,FileName,SuccessCallback,ErrorCallback,TargetPlatform)

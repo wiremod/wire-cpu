@@ -20,7 +20,7 @@ function CPUTest.RunCPU()
 		if CPUTest.VM.R1 == 1 then
 			CPUTest.TestSuite.FinishTest(false)
 		else
-			CPUTest.TestSuite.Error('CPU failed to read the bus! R1 was '..tostring(CPUTest.VM.R1))
+			CPUTest.TestSuite.Error("CPU failed to read the bus! R1 was "..tostring(CPUTest.VM.R1))
 			CPUTest.TestSuite.FinishTest(true)
 		end
 	else
@@ -30,6 +30,6 @@ function CPUTest.RunCPU()
 end
 
 function CPUTest.CompileError(msg)
-	CPUTest.TestSuite.Error('hit a compile time error '..msg)
+	CPUTest.TestSuite.Error("hit a compile time error "..msg)
 	CPUTest.TestSuite.FinishTest(true)
 end

@@ -71,7 +71,7 @@ function CPUTest.CompareResults()
 		end
 	end
 	if fail then
-		CPUTest.TestSuite.Error('Unexpected test results!')
+		CPUTest.TestSuite.Error("Unexpected test results!")
 		PrintTable({CPUTest.ResultVariations1,results1,CPUTest.ResultVariations2,results2})
 		CPUTest.TestSuite.FinishTest(true)
 	else
@@ -80,7 +80,7 @@ function CPUTest.CompareResults()
 end
 
 function CPUTest.CompileError(msg)
-	CPUTest.TestSuite.Error('hit a compile time error '..msg)
+	CPUTest.TestSuite.Error("hit a compile time error "..msg)
 	CPUTest.TestSuite.FinishTest(true)
 end
 
