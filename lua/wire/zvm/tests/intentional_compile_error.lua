@@ -1,4 +1,4 @@
-CPUTest = {}
+local CPUTest = {}
 
 function CPUTest:RunTest(VM,TestSuite)
 	CPUTest.VM = VM
@@ -14,3 +14,5 @@ end
 function CPUTest.CompileError()
 	CPUTest.TestSuite.FinishTest(false)
 end
+
+return CPUTest

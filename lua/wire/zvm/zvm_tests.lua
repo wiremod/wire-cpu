@@ -117,7 +117,7 @@ function ZVMTestSuite.RunNextTest()
 	local curVM = CPULib.VirtualMachine()
 	ZVMTestSuite.Initialize(curVM)
 	print("Running " .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
-	include(testDirectory .. "/" .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
+	local CPUTest = include(testDirectory .. "/" .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	CPUTest:RunTest(curVM,ZVMTestSuite)
 end
 

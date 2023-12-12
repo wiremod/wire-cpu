@@ -1,4 +1,4 @@
-CPUTest = {}
+local CPUTest = {}
 
 --not x and y = 14, name "Test Y"
 -- x and y = 11, name "Test Y"
@@ -84,3 +84,4 @@ function CPUTest.CompileError(msg)
 	CPUTest.TestSuite.FinishTest(true)
 end
 
+return CPUTest

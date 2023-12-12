@@ -1,4 +1,4 @@
-CPUTest = {}
+local CPUTest = {}
 
 function CPUTest:RunTest(VM,TestSuite)
 	CPUTest.VM = VM
@@ -25,3 +25,5 @@ function CPUTest.CompileError(msg)
 	CPUTest.TestSuite.Error("hit a compile time error " .. msg)
 	CPUTest.TestSuite.FinishTest(true)
 end
+
+return CPUTest
