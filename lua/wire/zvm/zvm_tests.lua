@@ -8,6 +8,8 @@ TESTING = true
 include("wire/cpulib.lua")
 include("wire/client/hlzasm/hc_compiler.lua")
 
+local color_white = Color(255,255,255)
+local color_red = Color(255,0,0)
 
 ZVMTestSuite = {
 	TestFiles = {},
@@ -78,32 +80,35 @@ function ZVMTestSuite.FinishTest(fail)
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
 			if ZVMTestSuite.TestStatuses[ind] then
 				failed = failed + 1
-				MsgC(Color(255,0,0), "Error ", Color(255,255,255), "in " .. i .. "\n")
+				MsgC(color_red, "Error ", color_white, "in " .. i .. "\n")
 			else
 				passed = passed + 1
 			end
 		end
-		local passmod, errormod = "",""
-		if passed > 1 then
+		local passmod, errormod, warnstring = "","",""
+		if passed ~= 1 then
 			passmod = "s"
 		end
-		if failed > 1 then
+		if failed ~= 1 then
 			errormod = "s"
 		end
-		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. ZVMTestSuite.Warnings .. "Compiler Warnings were generated")
+		if ZVMTestSuite.Warnings > 0 then
+			warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings were generated"
+		end
+		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. warnstring)
 	end
 end
 
 function ZVMTestSuite.Error(...)
-	local args = table.Pack(...)
-	MsgC(Color(255,0,0), "in file ", Color(255,255,255), ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue], Color(255,0,0), " Error: ")
+	local args = { ... }
+	MsgC(color_red, "in file ", color_white, ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue], color_red, " Error: ")
 	if args ~= nil then
 		if istable(args) then
 			for _, i in pairs(args) do
-				MsgC(Color(255,255,255), i)
+				MsgC(color_white, i)
 			end
 		else
-			MsgC(Color(255,255,255), tostring(args))
+			MsgC(color_white, tostring(args))
 		end
 	end
 	MsgC(Color(0,0,255), "\n")
