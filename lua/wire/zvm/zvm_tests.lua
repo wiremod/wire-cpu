@@ -331,7 +331,6 @@ function ZVMTestSuite.TriggerInput(VM, iname, value)
 		else
 			if value >= 1.0 then VM:Reset() end
 		end
-		-- Wire_TriggerOutput(VM, "Error", 0)
 	elseif iname == "Interrupt" then
 		if (value >= 32) and (value < 256) then
 			if (VM.Clk and not VM.VMStopped) then VM:ExternalInterrupt(math.floor(value)) end
@@ -406,9 +405,6 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 
 	local oldReset = VM.Reset
 	VM.Reset = function(...)
-		if VM.Clk and VM.VMStopped then
-			--VM:NextThink(CurTime())
-		end
 		VM.VMStopped = false
 		return oldReset(...)
 	end
