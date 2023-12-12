@@ -34,7 +34,6 @@ if CLIENT or TESTING then
   CPULib.Debugger.PointersByLine = {}
 
   CPULib.Debugger.Breakpoint = {}
-  CPULib.print = print
 
   -- Convars to control CPULib
   local wire_cpu_upload_speed = CreateClientConVar("wire_cpu_upload_speed",1000,false,false)
@@ -70,7 +69,7 @@ if CLIENT or TESTING then
     -- Start compiling the sourcecode
     HCOMP:StartCompile(source,fileName or "source",CPULib.OnWriteByte,nil)
     HCOMP.Settings.CurrentPlatform = targetPlatform or "CPU"
-    CPULib.print("=== HL-ZASM High Level Assembly Compiler Output ==")
+    print("=== HL-ZASM High Level Assembly Compiler Output ==")
 
     -- Initialize callbacks
     CPULib.SuccessCallback = successCallback
@@ -148,14 +147,14 @@ if CLIENT or TESTING then
     for _ = 1, compile_speed do
       local status,result = pcall(HCOMP.Compile,HCOMP)
       if not status then
-        CPULib.print("==================================================")
+        print("==================================================")
         if CPULib.ErrorCallback then CPULib.ErrorCallback(HCOMP.ErrorMessage or ("Internal error: "..result),HCOMP.ErrorPosition) end
         timer.Remove("cpulib_compile")
         CPULib.Compiling = false
 
         return
       elseif not result then
-        CPULib.print("==================================================")
+        print("==================================================")
         CPULib.Source = CPULib.CurrentSource
         CPULib.Buffer = CPULib.CurrentBuffer
 
