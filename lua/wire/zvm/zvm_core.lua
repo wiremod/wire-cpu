@@ -363,8 +363,10 @@ function ZVM:Dyn_StartQuotaInterrupt()
   self:Dyn_Emit("if VM.QuotaSupported then")
     self:Dyn_Emit("if VM.TMR > VM.Quota then")
       self:Dyn_EmitState()
-      self:Dyn_Emit("VM.IP = VM.IP + %d",self.PrecompileCurInstructionSize)
-      self:Dyn_Emit("VM.XEIP = VM.XEIP + %d",self.PrecompileCurInstructionSize)
+      self:Dyn_Emit("VM.LASTQUO = VM.TIMER+%d*VM.TimerDT",(self.PrecompileInstruction or 0))
+      self:Dyn_Emit("VM.QUOFLAG = 1")
+      self:Dyn_Emit("VM.IP = %d",self.PrecompileIP)
+      self:Dyn_Emit("VM.XEIP = %d",self.PrecompileXEIP)
       self:Dyn_Emit("$L function quotafunc(VM)")
 end
 
