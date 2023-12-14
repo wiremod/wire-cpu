@@ -234,11 +234,11 @@ ZVM.OpcodeTable[28] = function(self)  --SPG
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[29] = function(self)  --CPG
-  self:Dyn_Emit("$L idx = math.floor($1 / 128)")
+  self:Dyn_Emit("$L IDX = math.floor($1 / 128)")
   self:Dyn_Emit("$L PAGE = VM:GetPageByIndex(IDX)")
   self:Dyn_EmitInterruptCheck()
 
-  self:Dyn_Emit("if VM.CurrentPage.RunLevel <= VM.Page[idx].RunLevel then")
+  self:Dyn_Emit("if VM.CurrentPage.RunLevel <= PAGE.RunLevel then")
     self:Dyn_Emit("PAGE.Read = 1")
     self:Dyn_Emit("PAGE.Write = 1")
     self:Dyn_Emit("VM:SetPageByIndex(IDX)")
@@ -1601,9 +1601,9 @@ end
 ZVM.OpcodeTable[267] = function(self)   --MLOOKAT
   local seg1code = self.EmitOperandSegment[1] and "0" or "VM.DS"
   local seg2code = self.EmitOperandSegment[2] and "0" or "VM.DS"
-  self:Dyn_Emit("$L EYE    = VM:ReadVector3f($2 + %s+0",seg2code)
-  self:Dyn_Emit("$L CENTER = VM:ReadVector3f($2 + %s+3",seg2code)
-  self:Dyn_Emit("$L UP     = VM:ReadVector3f($2 + %s+6",seg2code)
+  self:Dyn_Emit("$L EYE = VM:ReadVector3f($2 + %s+0)",seg2code)
+  self:Dyn_Emit("$L CENTER = VM:ReadVector3f($2 + %s+3)",seg2code)
+  self:Dyn_Emit("$L UP = VM:ReadVector3f($2 + %s+6)",seg2code)
   self:Dyn_EmitInterruptCheck()
 
   self:Dyn_Emit("$L X = { 0, 0, 0 }")
