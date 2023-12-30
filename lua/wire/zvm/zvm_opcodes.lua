@@ -416,7 +416,11 @@ ZVM.OpcodeTable[60] = function(self)  --BIT
     self:Dyn_Emit("VM.CMPR = BITS[math.floor($2)] or 0")
     self:Dyn_Emit("VM.TMR = VM.TMR + 30")
   self:Dyn_Emit("else")
-    self:Dyn_Emit("VM.CMPR = bit.band($1,math.pow(2,$2))")
+    self:Dyn_Emit("if bit.band($1,math.pow(2,$2)) ~= 0 then")
+      self:Dyn_Emit("VM.CMPR = 1")
+    self:Dyn_Emit("else")
+      self:Dyn_Emit("VM.CMPR = 0")
+    self:Dyn_Emit("end")
   self:Dyn_Emit("end")
 end
 ZVM.OpcodeTable[61] = function(self)  --SBIT
