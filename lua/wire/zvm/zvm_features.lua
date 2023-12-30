@@ -1115,7 +1115,13 @@ function ZVM:BinarySHL(n,cnt)
   return self:BinaryToInteger(bits)
 end
 
-
+--------------------------------------------------------------------------------
+-- Clamps numbers to within a certain binary range using BAND
+-- if IPREC were 4 then 2^4 = 16, or 0b10000
+-- subtracting 1 from 16 would make it 0b01111, which is a mask for the first 4 bits
+function ZVM:ClampBinaryToIPREC(num)
+  return bit.band(num,math.pow(2,self.IPREC)-1)
+end
 
 
 --------------------------------------------------------------------------------
