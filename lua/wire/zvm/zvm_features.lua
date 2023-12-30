@@ -1120,7 +1120,14 @@ end
 -- if IPREC were 4 then 2^4 = 16, or 0b10000
 -- subtracting 1 from 16 would make it 0b01111, which is a mask for the first 4 bits
 function ZVM:ClampBinaryToIPREC(num)
-  return bit.band(num,math.pow(2,self.IPREC)-1)
+  local finalvalue = bit.band(num,math.pow(2,self.IPREC)-1)
+  if self.IPREC < 32 then
+    local msb = math.pow(2,self.IPREC-1)
+    if bit.band(msb,finalvalue) ~= 0 then 
+      return finalvalue - msb*2
+    end
+  end
+  return finalvalue
 end
 
 
