@@ -1120,9 +1120,9 @@ end
 -- if IPREC were 4 then 2^4 = 16, or 0b10000
 -- subtracting 1 from 16 would make it 0b01111, which is a mask for the first 4 bits
 function ZVM:ClampBinaryToIPREC(num)
-  local finalvalue = bit.band(num,math.pow(2,self.IPREC)-1)
+  local finalvalue = bit.band(num,math.ldexp(1,self.IPREC)-1)
   if self.IPREC < 32 then
-    local msb = math.pow(2,self.IPREC-1)
+    local msb = math.ldexp(1,self.IPREC-1)
     if bit.band(msb,finalvalue) ~= 0 then 
       return finalvalue - msb*2
     end
@@ -1130,6 +1130,13 @@ function ZVM:ClampBinaryToIPREC(num)
   return finalvalue
 end
 
+--------------------------------------------------------------------------------
+-- Performs ldexp with constant 1 significand and exp floored automatically.
+-- to get a value with only bit [num] enabled
+-- required because ldexp normally errors when a non-integer is passed as exp
+function ZVM:GetBit(num)
+  return math.ldexp(1,math.floor(num))
+end
 
 --------------------------------------------------------------------------------
 -- Reset to initial state
