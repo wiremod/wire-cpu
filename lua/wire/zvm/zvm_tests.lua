@@ -92,7 +92,7 @@ function ZVMTestSuite.FinishTest(fail)
 			errormod = "s"
 		end
 		if ZVMTestSuite.Warnings > 0 then
-			warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings were generated"
+			warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings"
 		end
 		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. warnstring)
 	end
@@ -118,10 +118,22 @@ function ZVMTestSuite.RunNextTest()
 	ZVMTestSuite.Initialize(curVM)
 	print("Running " .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
 	local CPUTest = include(testDirectory .. "/" .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue])
-	CPUTest:RunTest(curVM,ZVMTestSuite)
+	-- if the test provides a file table, we should use the table when grabbing files for the compiler/test
+	-- instead of the directory containing the tests
+	ZVMTestSuite.VirtualFiles = CPUTest.Files
+	local success, msg = pcall(CPUTest.Run,curVM,ZVMTestSuite)
+	if success ~= nil and success then
+		return ZVMTestSuite.FinishTest(false)
+	else
+		ZVMTestSuite.Error(tostring(msg))
+		return ZVMTestSuite.FinishTest(true)
+	end
 end
 
 function ZVMTestSuite:LoadFile(FileName)
+	if ZVMTestSuite.VirtualFiles then
+		return ZVMTestSuite.VirtualFiles[FileName]
+	end
 	return file.Read("lua/" .. testDirectory .. "/" .. FileName, "GAME")
 end
 
@@ -139,13 +151,17 @@ end
 function ZVMTestSuite.InternalSuccessCallback()
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile
 	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
-	ZVMTestSuite.CompileArgs.SuccessCallback()
+	if ZVMTestSuite.CompileArgs.SuccessCallback then
+		ZVMTestSuite.CompileArgs.SuccessCallback()
+	end
 end
 
-function ZVMTestSuite.InternalErrorCallback()
+function ZVMTestSuite.InternalErrorCallback(msg)
 	HCOMP.LoadFile = ZVMTestSuite.HCOMPLoadFile 
 	HCOMP.Warning = ZVMTestSuite.OldHCOMPWarning
-	ZVMTestSuite.CompileArgs.ErrorCallback()
+	if ZVMTestSuite.CompileArgs.ErrorCallback then
+		ZVMTestSuite.CompileArgs.ErrorCallback(msg)
+	end
 end
 
 function ZVMTestSuite.OnWriteByte(caller,address,data)
@@ -169,15 +185,15 @@ function ZVMTestSuite.StartCompileInternal()
 	ZVMTestSuite.Buffer = {}
 	HCOMP:StartCompile(SourceCode, FileName or "source", ZVMTestSuite.OnWriteByte, nil)
 	HCOMP.Settings.CurrentPlatform = "CPU"
-	local noError, anotherStep = true, true
+	local noError, returnedValue = true, true
 	local steps = 0
-	while noError and anotherStep do
-		noError,anotherStep = pcall(HCOMP.Compile, HCOMP)
+	while noError and returnedValue do
+		noError, returnedValue = pcall(HCOMP.Compile, HCOMP)
 	end
 	if not noError then
-		return ErrorCallback(HCOMP.ErrorMessage or ("Internal error: " .. result), HCOMP.ErrorPosition)
+		return ErrorCallback(HCOMP.ErrorMessage or ("Internal error: " .. returnedValue), HCOMP.ErrorPosition)
 	end
-	if not anotherStep then
+	if not returnedValue then
 		return SuccessCallback()
 	end
 end
@@ -236,7 +252,7 @@ function ZVMTestSuite.AddVirtualFunctions(VM)
 		ZVMTestSuite:FlashData(self,data)
 	end
 	function VM:RunStep()
-		ZVMTestSuite:Run(self)
+		ZVMTestSuite.Run(self)
 	end
 	function VM:TriggerInput(iname,name)
 		ZVMTestSuite.TriggerInput(self,iname,name)
@@ -261,52 +277,26 @@ function ZVMTestSuite.FlashData(VM,data)
 	end
 end
 
+function ZVMTestSuite:Deploy(device,code,errcallback)
+	self.Compile(code,"internal", nil, errcallback)
+	self.FlashData(device, self.GetCompileBuffer())
+end
+
 -- Execute ZCPU virtual machine
-function ZVMTestSuite:Run(VM)
+function ZVMTestSuite.Run(VM)
 	-- Calculate time-related variables
 	local CurrentTime = CurTime()
 	local DeltaTime = math.min(1/30,CurrentTime - (VM.PreviousTime or 0))
 	VM.PreviousTime = CurrentTime
 
-	-- Check if need to run till specific instruction
-	if VM.BreakpointInstructions then
-		VM.TimerDT = DeltaTime
-		VM.CPUIF = VM
-		VM:Step(8,function(VM)
-			VM:Dyn_Emit("if (VM.CPUIF.Clk and not VM.CPUIF.VMStopped) and (VM.CPUIF.OnVMStep) then")
-				VM:Dyn_EmitState()
-				VM:Emit("VM.CPUIF.OnVMStep()")
-			VM:Emit("end")
-			VM:Emit("if VM.CPUIF.BreakpointInstructions[VM.IP] then")
-				VM:Dyn_EmitState()
-				VM:Emit("VM.CPUIF.OnBreakpointInstruction(VM.IP)")
-				VM:Emit("VM.CPUIF.VMStopped = true")
-				VM:Emit("VM.TMR = VM.TMR + "..VM.PrecompileInstruction)
-				VM:Emit("VM.CODEBYTES = VM.CODEBYTES + "..VM.PrecompileBytes)
-				VM:Emit("if true then return end")
-			VM:Emit("end")
-			VM:Emit("if VM.CPUIF.LastInstruction and ((VM.IP > VM.CPUIF.LastInstruction) or VM.CPUIF.ForceLastInstruction) then")
-				VM:Dyn_EmitState()
-				VM:Emit("VM.CPUIF.ForceLastInstruction = nil")
-				VM:Emit("VM.CPUIF.OnLastInstruction()")
-				VM:Emit("VM.CPUIF.VMStopped = true")
-				VM:Emit("VM.TMR = VM.TMR + "..VM.PrecompileInstruction)
-				VM:Emit("VM.CODEBYTES = VM.CODEBYTES + "..VM.PrecompileBytes)
-				VM:Emit("if true then return end")
-			VM:Emit("end")
-		end)
-		VM.CPUIF = nil
-	else
-		-- How many steps VM must make to keep up with execution
-		local Cycles = math.max(1,math.floor(VM.Frequency*DeltaTime*0.5))
-		VM.TimerDT = (DeltaTime/Cycles)
+	local Cycles = math.max(1,math.floor(VM.Frequency*DeltaTime*0.5))
+	VM.TimerDT = (DeltaTime/Cycles)
 
-		while (Cycles > 0) and (VM.Clk) and (not VMStopped) and (VM.Idle == 0) do
-			-- Run VM step
-			local previousTMR = VM.TMR
-			VM:Step()
-			Cycles = Cycles - math.max(1, VM.TMR - previousTMR)
-		end
+	while (Cycles > 0) and (VM.Clk) and (not VMStopped) and (VM.Idle == 0) do
+		-- Run VM step
+		local previousTMR = VM.TMR
+		VM:Step()
+		Cycles = Cycles - math.max(1, VM.TMR - previousTMR)
 	end
 
 	-- Update VM timer
@@ -325,12 +315,7 @@ function ZVMTestSuite.TriggerInput(VM, iname, value)
 	elseif iname == "Frequency" then
 		if value > 0 then VM.Frequency = math.floor(value) end
 	elseif iname == "Reset" then   --VM may be nil
-		if VM.HWDEBUG ~= 0 then
-			VM.DBGSTATE = math.floor(value)
-			if (value > 0) and (value <= 1.0) then VM:Reset() end
-		else
 			if value >= 1.0 then VM:Reset() end
-		end
 	elseif iname == "Interrupt" then
 		if (value >= 32) and (value < 256) then
 			if (VM.Clk and not VM.VMStopped) then VM:ExternalInterrupt(math.floor(value)) end

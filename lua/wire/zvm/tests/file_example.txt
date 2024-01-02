@@ -1,3 +1,0 @@
-x:
-INC R0
-JMP x

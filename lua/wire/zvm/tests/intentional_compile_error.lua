@@ -1,18 +1,11 @@
-local CPUTest = {}
+local Test = {}
 
-function CPUTest:RunTest(VM,TestSuite)
-	CPUTest.VM = VM
-	CPUTest.TestSuite = TestSuite
-	TestSuite.Compile("MOV R0,", nil, CPUTest.RunCPU, CPUTest.CompileError)
+function Test.Run(CPU,TestSuite)
+	return TestSuite.Compile("MOV R0,", nil, Test.CompileSucceed)
 end
 
-function CPUTest.RunCPU()
-	CPUTest.TestSuite.Error("Compiler did not error when it should have!")
-	CPUTest.TestSuite.FinishTest(true)
+function Test.CompileSucceed()
+	assert(false, "Compiler should have errored!")
 end
 
-function CPUTest.CompileError()
-	CPUTest.TestSuite.FinishTest(false)
-end
-
-return CPUTest
+return Test
