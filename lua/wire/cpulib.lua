@@ -899,6 +899,27 @@ function CPULib:RebuildExtendedInstructions()
   end
 end
 
+function CPULib:ToExtensionString(exttable)
+  local ext_str = ""
+  for _,ext in ipairs(exttable) do
+    ext_str = ext_str .. ext .. ';'
+  end
+  return ext_str
+end
+
+function CPULib:FromExtensionString(extstr,platform)
+  local extensions = {}
+  -- only available extensions are loaded
+  if not extstr then return {} end
+  for ext in string.gmatch(extstr or "","([^;]*);") do
+    print("extracted "..ext)
+    if CPULib.Extensions[platform] and CPULib.Extensions[platform][ext] then
+      table.insert(extensions,ext)
+    end
+  end
+  return extensions
+end
+
 function CPULib:LoadExtensionOrder(extensions, platform)
   self.ExtensionOrder[platform] = extensions
   self:RebuildExtendedInstructions()
@@ -912,11 +933,14 @@ function CPULib:LoadExtensions(VM, platform)
     return false
   end
   local curInstruction = -1
+  print("vm ext: ")
+  PrintTable(VM.Extensions)
   for _, name in pairs(VM.Extensions) do
     if self.Extensions[platform][name] then
       -- The actual load order is the order that it's in for the VM.
       for _,instr in ipairs(self.Extensions[platform][name].Instructions) do
-        VM.OperandCount[curInstruction] = instr.OpCount
+        print(instr.Name .. " added")
+        VM.OperandCount[curInstruction] = instr.Operands
         VM.OpcodeTable[curInstruction] = instr.OpFunc
         curInstruction = curInstruction - 1
       end

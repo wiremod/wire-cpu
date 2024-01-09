@@ -58,6 +58,7 @@ if SERVER then
   function TOOL:MakeEnt(ply, model, Ang, trace)
     local ent = WireLib.MakeWireEnt(ply, {Class = self.WireClass, Pos=trace.HitPos, Angle=Ang, Model=model})
     ent:SetMemoryModel(self:GetClientInfo("memorymodel"))
+    ent:SetExtensionLoadOrder(self:GetClientInfo("extensions"))
     self:LeftClick_Update(trace)
     return ent
   end
@@ -179,7 +180,8 @@ if CLIENT then
 
     local enabledExtensionOrder = {}
     local enabledExtensionLookup = {}
-    for ext in string.gmatch(wire_gpu_extensions or "","([^;]*);") do
+    local extensionConvar = GetConVar("wire_gpu_extensions")
+    for ext in string.gmatch(extensionConvar:GetString() or "","([^;]*);") do
       if CPULib.Extensions["GPU"] and CPULib.Extensions["GPU"][ext] then
         enabledExtensionLookup[ext] = true
         table.insert(enabledExtensionOrder,ext)
@@ -193,7 +195,7 @@ if CLIENT then
     ExtensionPanel:SetSize(470,200)
     DisabledExtensionPanel:SetSize(235,200)
 
-    PrintTable(CPULib.Extensions["GPU"])
+    -- PrintTable(CPULib.Extensions["GPU"])
 
     for k,_ in pairs(CPULib.Extensions["GPU"]) do
       if enabledExtensionLookup[k] then
@@ -208,6 +210,7 @@ if CLIENT then
       for _,line in pairs(ExtensionPanel:GetLines()) do
         table.insert(extensions,line:GetValue(1))
       end
+      extensionConvar:SetString(CPULib:ToExtensionString(extensions))
       CPULib:LoadExtensionOrder(extensions,"GPU")
     end
 

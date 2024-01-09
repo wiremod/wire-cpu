@@ -211,13 +211,7 @@ for symID,symList in pairs(HCOMP.TOKEN_TEXT) do
   end
 end
 
--- Add opcodes to the lookup table
-for _,languageName in pairs(HCOMP.TOKEN_TEXT["OPCODE"][1]) do
-  HCOMP.PARSER_LOOKUP[languageName] = HCOMP.PARSER_LOOKUP[languageName] or {}
-  for opcodeName,opcodeNo in pairs(HCOMP.OpcodeNumber) do
-    HCOMP.PARSER_LOOKUP[languageName][string.upper(opcodeName)] = { opcodeName, HCOMP.TOKEN.OPCODE }
-  end
-end
+
 
 
 function HCOMP:RemoveTokenizerOpcodes(indexes)
@@ -230,18 +224,17 @@ function HCOMP:RemoveTokenizerOpcodes(indexes)
   end
 end
 
-function HCOMP:CreateTokenizerOpcodes(indexes)
-  -- Add opcodes to the lookup table from list of indexes
-  for _,languageName in pairs(self.TOKEN_TEXT["OPCODE"][1]) do
-    self.PARSER_LOOKUP[languageName] = self.PARSER_LOOKUP[languageName] or {}
-    for _,index in ipairs(indexes) do
-      print(CPULib.InstructionTable[index].Mnemonic)
-      self.PARSER_LOOKUP[languageName][string.upper(CPULib.InstructionTable[index].Mnemonic)] = { CPULib.InstructionTable[index].Mnemonic, HCOMP.TOKEN.OPCODE }
+function HCOMP:RegenerateTokenizerOpcodes()
+-- Add opcodes to the lookup table
+for _,languageName in pairs(HCOMP.TOKEN_TEXT["OPCODE"][1]) do
+    HCOMP.PARSER_LOOKUP[languageName] = HCOMP.PARSER_LOOKUP[languageName] or {}
+    for opcodeName,opcodeNo in pairs(HCOMP.OpcodeNumber) do
+      HCOMP.PARSER_LOOKUP[languageName][string.upper(opcodeName)] = { opcodeName, HCOMP.TOKEN.OPCODE }
     end
   end
 end
 
-
+HCOMP:RegenerateTokenizerOpcodes()
 
 --------------------------------------------------------------------------------
 -- Skip a single file in input

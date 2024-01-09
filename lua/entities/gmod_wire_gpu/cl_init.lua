@@ -46,6 +46,7 @@ usermessage.Hook("wire_gpu_monitorstate", GPU_MonitorState)
 -- Update GPU features/memory model
 --------------------------------------------------------------------------------
 local function GPU_MemoryModel(um)
+  print("setmemory")
   local GPU = ents.GetByIndex(um:ReadLong())
   if not GPU then return end
   if not GPU:IsValid() then return end
@@ -62,6 +63,22 @@ local function GPU_MemoryModel(um)
 end
 usermessage.Hook("wire_gpu_memorymodel", GPU_MemoryModel)
 
+local function GPU_SetExtensions(um)
+  print("setextensions")
+  local GPU = ents.GetByIndex(um:ReadLong())
+  if not GPU then return end
+  if not GPU:IsValid() then return end
+  local extstr = um:ReadString()
+  local extensions = CPULib:FromExtensionString(extstr,"GPU")
+  print("umsg "..extstr)
+  if GPU.VM then
+    GPU.VM.Extensions = extensions
+    CPULib:LoadExtensions(GPU.VM,"GPU")
+  end
+  GPU.ZVMExtensions = extstr
+end
+usermessage.Hook("wire_gpu_extensions", GPU_SetExtensions)
+
 local wire_gpu_frameratio = CreateClientConVar("wire_gpu_frameratio",4)
 
 function ENT:Initialize()
@@ -75,6 +92,9 @@ function ENT:Initialize()
   self.VM.CPUVER  = 1.0 -- Beta GPU by default
   self.VM.CPUTYPE = 1 -- ZGPU
   self.ChipType   = 0
+  self.VM.Extensions = CPULib:FromExtensionString(self.ZVMExtensions,"GPU")
+  --print(self.ZVMExtensions)
+  --PrintTable(self.VM.Extensions)
 
   -- Hard-reset VM and override it
   self:OverrideVM()

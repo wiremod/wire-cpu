@@ -185,7 +185,10 @@ function ENT:OverrideVM()
   self.VM.OperandCount[131] = nil --SMAP
   self.VM.OperandCount[132] = nil --GMAP
 
-  CPULib:LoadExtensions(self.VM,"GPU")
+  if self.ZVMExtensions then
+    self.VM.Extensions = CPULib:FromExtensionString(self.ZVMExtensions,"GPU")
+    CPULib:LoadExtensions(self.VM,"GPU")
+  end
 
   -- Add some extra lookups
   self.VM.FontName = {}

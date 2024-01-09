@@ -82,7 +82,7 @@ local function CreateInstructions(indexes)
   buildWritesFirstLookup(newInstructions)
   buildOpLookupTable(newInstructions)
   buildDeprecatedLookupTable(newInstructions)
-  HCOMP:CreateTokenizerOpcodes(newInstructions)
+  HCOMP:RegenerateTokenizerOpcodes()
 end
 
 table.insert(CPULib.RemoveInstructionHooks,RemoveInstructions)
