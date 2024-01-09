@@ -16,6 +16,7 @@ WireToolSetup.SetupMax( 7 )
 TOOL.ClientConVar = {
   model             = "models/cheeze/wires/cpu.mdl",
   filename          = "",
+  extensions        = ""
 }
 
 if CLIENT then

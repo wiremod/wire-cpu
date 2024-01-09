@@ -185,6 +185,8 @@ function ENT:OverrideVM()
   self.VM.OperandCount[131] = nil --SMAP
   self.VM.OperandCount[132] = nil --GMAP
 
+  CPULib:LoadExtensions(self.VM,"GPU")
+
   -- Add some extra lookups
   self.VM.FontName = {}
   self.VM.FontName[0] = "Lucida Console"

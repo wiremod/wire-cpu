@@ -32,7 +32,7 @@ function HCOMP:Opcode() local TOKEN,TOKENSET = self.TOKEN,self.TOKENSET
   local opcodeName = self.TokenData
   local opcodeNo = self.OpcodeNumber[self.TokenData]
   local operandCount = self.OperandCount[opcodeNo]
-
+  print(opcodeName, opcodeNo, operandCount)
   -- Check if opcode is obsolete or old
   if self.OpcodeObsolete[opcodeName] then
     self:Warning("Instruction \""..opcodeName.."\" is obsolete")

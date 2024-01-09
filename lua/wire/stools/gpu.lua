@@ -18,6 +18,7 @@ TOOL.ClientConVar = {
   model             = "models/cheeze/wires/cpu.mdl",
   filename          = "",
   memorymodel       = "64k",
+  extensions        = ""
 }
 
 if CLIENT then
@@ -176,14 +177,56 @@ if CLIENT then
     })
     panel:AddControl("Label", {Text = "Memory model selects GPU memory size and its operation mode"})
 
+    local enabledExtensionOrder = {}
+    local enabledExtensionLookup = {}
+    for ext in string.gmatch(wire_gpu_extensions or "","([^;]*);") do
+      if CPULib.Extensions["GPU"] and CPULib.Extensions["GPU"][ext] then
+        enabledExtensionLookup[ext] = true
+        table.insert(enabledExtensionOrder,ext)
+      end
+    end
 
-    ----------------------------------------------------------------------------
---    panel:AddControl("Button", {
---      Text = "ZGPU documentation (online)"
---    })
---    panel:AddControl("Label", {
---      Text = "Loads online GPU documentation and tutorials"
---    })
+    local ExtensionPanel = vgui.Create("DListView")
+    local DisabledExtensionPanel = vgui.Create("DListView")
+    ExtensionPanel:AddColumn("Enabled Extensions")
+    DisabledExtensionPanel:AddColumn("Disabled Extensions")
+    ExtensionPanel:SetSize(470,200)
+    DisabledExtensionPanel:SetSize(235,200)
+
+    PrintTable(CPULib.Extensions["GPU"])
+
+    for k,_ in pairs(CPULib.Extensions["GPU"]) do
+      if enabledExtensionLookup[k] then
+        ExtensionPanel:AddLine(k)
+      else
+        DisabledExtensionPanel:AddLine(k)
+      end
+    end
+
+    local function ReloadExtensions()
+      local extensions = {}
+      for _,line in pairs(ExtensionPanel:GetLines()) do
+        table.insert(extensions,line:GetValue(1))
+      end
+      CPULib:LoadExtensionOrder(extensions,"GPU")
+    end
+
+    function ExtensionPanel:OnRowSelected(rIndex,row)
+      DisabledExtensionPanel:AddLine(row:GetValue(1))
+      self:RemoveLine(rIndex)
+      ReloadExtensions()
+    end
+
+    function DisabledExtensionPanel:OnRowSelected(rIndex,row)
+      ExtensionPanel:AddLine(row:GetValue(1))
+      self:RemoveLine(rIndex)
+      ReloadExtensions()
+    end
+
+    panel:AddItem(ExtensionPanel)
+    panel:AddItem(DisabledExtensionPanel)
+
+
   end
 
   ------------------------------------------------------------------------------

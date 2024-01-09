@@ -211,7 +211,6 @@ for symID,symList in pairs(HCOMP.TOKEN_TEXT) do
   end
 end
 
-
 -- Add opcodes to the lookup table
 for _,languageName in pairs(HCOMP.TOKEN_TEXT["OPCODE"][1]) do
   HCOMP.PARSER_LOOKUP[languageName] = HCOMP.PARSER_LOOKUP[languageName] or {}
@@ -220,6 +219,27 @@ for _,languageName in pairs(HCOMP.TOKEN_TEXT["OPCODE"][1]) do
   end
 end
 
+
+function HCOMP:RemoveTokenizerOpcodes(indexes)
+  -- Remove opcodes from the lookup table
+  for _,languageName in pairs(self.TOKEN_TEXT["OPCODE"][1]) do
+    self.PARSER_LOOKUP[languageName] = self.PARSER_LOOKUP[languageName] or {}
+    for _,index in ipairs(indexes) do
+      self.PARSER_LOOKUP[languageName][string.upper(CPULib.InstructionTable[index].Mnemonic)] = nil
+    end
+  end
+end
+
+function HCOMP:CreateTokenizerOpcodes(indexes)
+  -- Add opcodes to the lookup table from list of indexes
+  for _,languageName in pairs(self.TOKEN_TEXT["OPCODE"][1]) do
+    self.PARSER_LOOKUP[languageName] = self.PARSER_LOOKUP[languageName] or {}
+    for _,index in ipairs(indexes) do
+      print(CPULib.InstructionTable[index].Mnemonic)
+      self.PARSER_LOOKUP[languageName][string.upper(CPULib.InstructionTable[index].Mnemonic)] = { CPULib.InstructionTable[index].Mnemonic, HCOMP.TOKEN.OPCODE }
+    end
+  end
+end
 
 
 

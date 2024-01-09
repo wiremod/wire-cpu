@@ -821,6 +821,112 @@ local function GPU(...) Entry("GPU",...) end
 local function VEX(...) Entry("VEX",...) end
 local function SPU(...) Entry("SPU",...) end
 
+CPULib.Extensions = CPULib.Extensions or {}
+
+-- These are the indexes that we should remove from the instruction table
+-- when recalculating which instructions should be available to the compiler
+CPULib.ExtendedInstructions = CPULib.ExtendedInstructions or {}
+
+-- Holds the load order for extensions by platform
+CPULib.ExtensionOrder = CPULib.ExtensionOrder or {}
+
+-- When the extension list is regenerated it will run these funcs to tell
+-- CPULib instruction dependant sources to alter their lookup tables to reflect
+-- the current set of instructions
+
+-- Instruction indexes that should be removed from lookup tables
+CPULib.RemoveInstructionHooks = CPULib.RemoveInstructionHooks or {}
+
+-- Instruction indexes that should be added to the lookup tables
+CPULib.CreateInstructionHooks = CPULib.CreateInstructionHooks or {}
+
+CPULib.FlagLookup = {
+  ["W1"] = W1,
+  ["R0"] = R0,
+  ["OB"] = OB,
+  ["UB"] = UB,
+  ["CB"] = CB,
+  ["TR"] = TR,
+  ["OL"] = OL,
+  ["BL"] = BL
+}
+
+-- Parses an array of flags into a single number from a lookup table by name
+function CPULib:ParseFlagArray(flags)
+  if not flags then return 0 end
+  local n = 0
+
+  for _,v in ipairs(flags) do
+    if self.FlagLookup[v] then
+      n = n + self.FlagLookup[v]
+    end
+  end
+  return n
+end
+
+function CPULib:RegisterExtension(name, extension)
+  if not self.Extensions[extension.Platform] then
+    self.Extensions[extension.Platform] = {}
+  end
+  if not self.Extensions[extension.Platform][name] then
+    self.Extensions[extension.Platform][name] = extension
+  end
+end
+
+-- Rebuilds the instruction table according to the load order
+function CPULib:RebuildExtendedInstructions()
+  for _,hook in ipairs(self.RemoveInstructionHooks) do
+    hook(self.ExtendedInstructions)
+  end
+  for _,v in ipairs(self.ExtendedInstructions) do
+    self.InstructionTable[v] = nil
+  end
+  self.ExtendedInstructions = {}
+
+  -- rebuild by extension name
+  for platname,platform in pairs(self.ExtensionOrder) do
+    local curOpcode = -1
+    for _,extension in ipairs(platform) do
+      for _,i in ipairs(self.Extensions[platname][extension].Instructions) do
+        Entry(platname,curOpcode,i.Name,i.Operands,i.Version,self.ParseFlagArray(i.Flags),i.Op1Name,i.Op2Name,i.Description)
+        table.insert(self.ExtendedInstructions,#CPULib.InstructionTable)
+        curOpcode = curOpcode - 1
+      end
+    end
+  end
+  for _,hook in ipairs(self.CreateInstructionHooks) do
+    hook(self.ExtendedInstructions)
+  end
+end
+
+function CPULib:LoadExtensionOrder(extensions, platform)
+  self.ExtensionOrder[platform] = extensions
+  self:RebuildExtendedInstructions()
+end
+
+function CPULib:LoadExtensions(VM, platform)
+  -- Uses negative indexes to avoid collision with non-extension instructions
+  -- since there's currently a cap on only being able to have 1000(0 to 999) instructions
+  -- using negative indices would expand that to allow for 999(-1 to -999) more instructions
+  if not VM.Extensions then
+    return false
+  end
+  local curInstruction = -1
+  for _, name in pairs(VM.Extensions) do
+    if self.Extensions[platform][name] then
+      -- The actual load order is the order that it's in for the VM.
+      for _,instr in ipairs(self.Extensions[platform][name].Instructions) do
+        VM.OperandCount[curInstruction] = instr.OpCount
+        VM.OpcodeTable[curInstruction] = instr.OpFunc
+        curInstruction = curInstruction - 1
+      end
+    else
+      -- return true on err, false/nothing otherwise
+      print(name .. ' unavailable!!!')
+    end
+  end
+end
+
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 -- Zyelios CPU/GPU/SPU instruction set reference table

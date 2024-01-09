@@ -19,6 +19,7 @@ TOOL.ClientConVar = {
   model             = "models/cheeze/wires/cpu.mdl",
   filename          = "",
   memorymodel       = "64krom",
+  extensions        = ""
 }
 
 if CLIENT then
