@@ -192,10 +192,8 @@ if CLIENT then
     local DisabledExtensionPanel = vgui.Create("DListView")
     ExtensionPanel:AddColumn("Enabled Extensions")
     DisabledExtensionPanel:AddColumn("Disabled Extensions")
-    ExtensionPanel:SetSize(470,200)
+    ExtensionPanel:SetSize(235,200)
     DisabledExtensionPanel:SetSize(235,200)
-
-    -- PrintTable(CPULib.Extensions["GPU"])
 
     for k,_ in pairs(CPULib.Extensions["GPU"]) do
       if enabledExtensionLookup[k] then

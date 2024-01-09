@@ -46,7 +46,6 @@ usermessage.Hook("wire_gpu_monitorstate", GPU_MonitorState)
 -- Update GPU features/memory model
 --------------------------------------------------------------------------------
 local function GPU_MemoryModel(um)
-  print("setmemory")
   local GPU = ents.GetByIndex(um:ReadLong())
   if not GPU then return end
   if not GPU:IsValid() then return end
@@ -64,13 +63,11 @@ end
 usermessage.Hook("wire_gpu_memorymodel", GPU_MemoryModel)
 
 local function GPU_SetExtensions(um)
-  print("setextensions")
   local GPU = ents.GetByIndex(um:ReadLong())
   if not GPU then return end
   if not GPU:IsValid() then return end
   local extstr = um:ReadString()
   local extensions = CPULib:FromExtensionString(extstr,"GPU")
-  print("umsg "..extstr)
   if GPU.VM then
     GPU.VM.Extensions = extensions
     CPULib:LoadExtensions(GPU.VM,"GPU")
@@ -93,8 +90,6 @@ function ENT:Initialize()
   self.VM.CPUTYPE = 1 -- ZGPU
   self.ChipType   = 0
   self.VM.Extensions = CPULib:FromExtensionString(self.ZVMExtensions,"GPU")
-  --print(self.ZVMExtensions)
-  --PrintTable(self.VM.Extensions)
 
   -- Hard-reset VM and override it
   self:OverrideVM()
@@ -207,7 +202,6 @@ function ENT:Run(isAsync)
   else
     self.VM.SyncQuotaOverrun = self.VM.QuotaOverrunFunc
     if self.VM.SyncQuotaOverrun then
-      print(self.VM.LateFrames)
       self.VM.SyncQuotaIP = self.VM.IP
       self.VM.LateFrames = self.VM.LateFrames + 1
     else

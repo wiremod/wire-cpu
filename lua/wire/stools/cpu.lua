@@ -77,6 +77,7 @@ if SERVER then
   function TOOL:MakeEnt(ply, model, Ang, trace)
     local ent = WireLib.MakeWireEnt(ply, {Class = self.WireClass, Pos=trace.HitPos, Angle=Ang, Model=model})
     ent:SetMemoryModel(self:GetClientInfo("memorymodel"))
+    ent:SetExtensionLoadOrder(self:GetClientInfo("extensions"))
     self:LeftClick_Update(trace)
     return ent
   end
@@ -196,6 +197,56 @@ if CLIENT then
       }
     })
     panel:AddControl("Label", {Text = "Sets the processor memory model (determines interaction with the external devices)"})
+
+    local enabledExtensionOrder = {}
+    local enabledExtensionLookup = {}
+    local extensionConvar = GetConVar("wire_cpu_extensions")
+    for ext in string.gmatch(extensionConvar:GetString() or "","([^;]*);") do
+      if CPULib.Extensions["CPU"] and CPULib.Extensions["CPU"][ext] then
+        enabledExtensionLookup[ext] = true
+        table.insert(enabledExtensionOrder,ext)
+      end
+    end
+
+    local ExtensionPanel = vgui.Create("DListView")
+    local DisabledExtensionPanel = vgui.Create("DListView")
+    ExtensionPanel:AddColumn("Enabled Extensions")
+    DisabledExtensionPanel:AddColumn("Disabled Extensions")
+    ExtensionPanel:SetSize(235,200)
+    DisabledExtensionPanel:SetSize(235,200)
+
+    for k,_ in pairs(CPULib.Extensions["CPU"]) do
+      if enabledExtensionLookup[k] then
+        ExtensionPanel:AddLine(k)
+      else
+        DisabledExtensionPanel:AddLine(k)
+      end
+    end
+
+    local function ReloadExtensions()
+      local extensions = {}
+      for _,line in pairs(ExtensionPanel:GetLines()) do
+        table.insert(extensions,line:GetValue(1))
+      end
+      extensionConvar:SetString(CPULib:ToExtensionString(extensions))
+      CPULib:LoadExtensionOrder(extensions,"CPU")
+    end
+
+    function ExtensionPanel:OnRowSelected(rIndex,row)
+      DisabledExtensionPanel:AddLine(row:GetValue(1))
+      self:RemoveLine(rIndex)
+      ReloadExtensions()
+    end
+
+    function DisabledExtensionPanel:OnRowSelected(rIndex,row)
+      ExtensionPanel:AddLine(row:GetValue(1))
+      self:RemoveLine(rIndex)
+      ReloadExtensions()
+    end
+
+    panel:AddItem(ExtensionPanel)
+    panel:AddItem(DisabledExtensionPanel)
+
   end
 
 
