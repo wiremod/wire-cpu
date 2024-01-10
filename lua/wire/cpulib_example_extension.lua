@@ -96,6 +96,6 @@ local mySPUExtension = {
 	}}
 }
 
-CPULib:RegisterExtension("gpu_test", myGPUExtension)
-CPULib:RegisterExtension("spu_test", mySPUExtension)
-CPULib:RegisterExtension("cpu_test", myCPUExtension)
+-- CPULib:RegisterExtension("gpu_test", myGPUExtension)
+-- CPULib:RegisterExtension("spu_test", mySPUExtension)
+-- CPULib:RegisterExtension("cpu_test", myCPUExtension)
