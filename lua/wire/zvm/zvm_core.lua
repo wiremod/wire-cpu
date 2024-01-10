@@ -467,8 +467,8 @@ function ZVM:Precompile_Step()
   local Opcode,RM = self:Precompile_Fetch(),0
   local isFixedSize = false
   local OpCount,OpRunLevel = self.OperandCount,self.OpcodeRunLevel
-  local RealOpcode = Opcode
-  if Opcode < 0 then
+  local negativeOp = Opcode and Opcode < 0
+  if negativeOp then
     OpCount,OpRunLevel = self.ExtOperandCount,self.ExtOpcodeRunLevel
     Opcode = Opcode * - 1
   end
@@ -594,7 +594,11 @@ function ZVM:Precompile_Step()
     end
 
     -- Emit opcode
-    self:Dyn_EmitOpcode(RealOpcode)
+    if negativeOp then
+      self:Dyn_EmitOpcode(Opcode*-1)
+    else
+      self:Dyn_EmitOpcode(Opcode)
+    end
 
     -- Write back the values
     if OpCount[Opcode] and (OpCount[Opcode] > 0) then
