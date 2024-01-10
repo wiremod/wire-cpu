@@ -936,13 +936,16 @@ function CPULib:LoadExtensions(VM, platform)
     if self.Extensions[platform][name] then
       -- The actual load order is the order that it's in for the VM.
       for _,instr in ipairs(self.Extensions[platform][name].Instructions) do
-        VM.OperandCount[curInstruction] = instr.Operands
+        VM.ExtOperandCount[curInstruction*-1] = instr.Operands
+        if instr.Privileged then
+          VM.ExtOperandRunLevel[curInstruction*-1] = 0
+        end
         VM.OpcodeTable[curInstruction] = instr.OpFunc
         curInstruction = curInstruction - 1
       end
     else
-      -- return true on err, false/nothing otherwise
-      print(name .. ' unavailable!!!')
+      -- return name of missing extension on error
+      return name
     end
   end
 end

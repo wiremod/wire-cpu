@@ -5,15 +5,30 @@ end
 local myGPUExtension = {
 	Platform = "GPU",
 	Instructions = {{
-		Name = "EXT_TEST",
-		Operands = 0,
+		Name = "GPU_TEST1",
+		Operands = 1,
 		Version = 0.42,
-		Flags = {},
-		Op1Name = "",
+		Flags = {"W1"}, -- writes first operand
+		Op1Name = "X",
 		Op2Name = "",
-		Description = "Basic test instruction, added by an extension.",
+		Description = "Sets Register X to constant 42",
 		["OpFunc"] = function(self)
-			self:Dyn_Emit("print('test succeeded! Woohoo')")
+			-- The end value of the code in Dyn_EmitOperand will be assigned
+			-- to the first/left hand register used in this instruction
+			self:Dyn_EmitOperand("42")
+		end
+	},
+	{
+		Name = "GPU_TEST2",
+		Operands = 1,
+		Version = 0.42,
+		Flags = {"W1"}, -- writes first operand
+		Op1Name = "X",
+		Op2Name = "",
+		Description = "Divides Register X by constant 24",
+		["OpFunc"] = function(self)
+			-- $1 and $2 refer to the first, and second operands of the instruction respectively
+			self:Dyn_EmitOperand("$1/24")
 		end
 	}}
 }
@@ -31,7 +46,6 @@ local myCPUExtension = {
 		["OpFunc"] = function(self)
 			-- The end value of the code in Dyn_EmitOperand will be assigned
 			-- to the first/left hand register used in this instruction
-			self:Dyn_Emit("print('cpu_test $1')")
 			self:Dyn_EmitOperand("42")
 		end
 	},
@@ -42,15 +56,46 @@ local myCPUExtension = {
 		Flags = {"W1"}, -- writes first operand
 		Op1Name = "X",
 		Op2Name = "",
-		Description = "Sets Register X to constant 24",
+		Description = "Divides Register X by constant 24",
 		["OpFunc"] = function(self)
-			-- The end value of the code in Dyn_EmitOperand will be assigned
-			-- to the first/left hand register used in this instruction
-			self:Dyn_EmitOperand("24")
+			-- $1 and $2 refer to the first, and second operands of the instruction respectively
+			self:Dyn_EmitOperand("$1/24")
 		end
 	}}
 }
 
 
-CPULib:RegisterExtension("basic_test", myGPUExtension)
+local mySPUExtension = {
+	Platform = "SPU",
+	Instructions = {{
+		Name = "SPU_TEST1",
+		Operands = 1,
+		Version = 0.42,
+		Flags = {"W1"}, -- writes first operand
+		Op1Name = "X",
+		Op2Name = "",
+		Description = "Sets Register X to constant 42",
+		["OpFunc"] = function(self)
+			-- The end value of the code in Dyn_EmitOperand will be assigned
+			-- to the first/left hand register used in this instruction
+			self:Dyn_EmitOperand("42")
+		end
+	},
+	{
+		Name = "SPU_TEST2",
+		Operands = 1,
+		Version = 0.42,
+		Flags = {"W1"}, -- writes first operand
+		Op1Name = "X",
+		Op2Name = "",
+		Description = "Divides Register X by constant 24",
+		["OpFunc"] = function(self)
+			-- $1 and $2 refer to the first, and second operands of the instruction respectively
+			self:Dyn_EmitOperand("$1/24")
+		end
+	}}
+}
+
+CPULib:RegisterExtension("gpu_test", myGPUExtension)
+CPULib:RegisterExtension("spu_test", mySPUExtension)
 CPULib:RegisterExtension("cpu_test", myCPUExtension)

@@ -77,7 +77,6 @@ local function CreateInstructions(indexes)
   for _,inst in ipairs(indexes) do
     table.insert(newInstructions,CPULib.InstructionTable[inst])
   end
-  PrintTable(newInstructions)
   buildMainLookup(newInstructions)
   buildWritesFirstLookup(newInstructions)
   buildOpLookupTable(newInstructions)

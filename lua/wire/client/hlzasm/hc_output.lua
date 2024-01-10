@@ -604,7 +604,7 @@ function HCOMP:WriteBlock(block)
       return
     end
     local Opcode,RM = self.OpcodeNumber[block.Opcode],nil
-    local negativeOp = Opcode < 0
+    local negativeOp = Opcode and Opcode < 0
     if negativeOp then
       Opcode = Opcode*-1
     end

@@ -194,12 +194,13 @@ if CLIENT then
     DisabledExtensionPanel:AddColumn("Disabled Extensions")
     ExtensionPanel:SetSize(235,200)
     DisabledExtensionPanel:SetSize(235,200)
-
-    for k,_ in pairs(CPULib.Extensions["GPU"]) do
-      if enabledExtensionLookup[k] then
-        ExtensionPanel:AddLine(k)
-      else
-        DisabledExtensionPanel:AddLine(k)
+    if CPULib.Extensions["GPU"] then
+      for k,_ in pairs(CPULib.Extensions["GPU"]) do
+        if enabledExtensionLookup[k] then
+          ExtensionPanel:AddLine(k)
+        else
+          DisabledExtensionPanel:AddLine(k)
+        end
       end
     end
 
@@ -226,7 +227,9 @@ if CLIENT then
 
     panel:AddItem(ExtensionPanel)
     panel:AddItem(DisabledExtensionPanel)
-
+    -- Reload the extensions at least once to make sure users don't have to touch the list
+    -- in order to use extensions on first opening of the tool menu
+    ReloadExtensions()
 
   end
 
