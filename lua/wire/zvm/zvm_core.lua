@@ -81,7 +81,6 @@ end
 --------------------------------------------------------------------------------
 -- Load/fetch operand (by RM)
 function ZVM:Dyn_LoadOperand(OP,RM)
-  print("loadoperand "..OP.." as "..RM)
   if self.OperandReadFunctions[RM] then
     local preEmit
     if self.ReadInvolvedRegisterLookup[RM] and
@@ -148,10 +147,8 @@ end
 --------------------------------------------------------------------------------
 -- Preprocess microcode text (for microcode syntax to work)
 function ZVM:Dyn_PreprocessEmit(text)
-  print('preprocess input ' .. text)
   local preEmit = string.gsub(   text,"$1",self.EmitOperand[1])
         preEmit = string.gsub(preEmit,"$2",self.EmitOperand[2])
-  print('op1 ' .. self.EmitOperand[1])
   return string.gsub(preEmit,"$L","local")
 end
 
@@ -171,7 +168,6 @@ end
 -- Emit operand being set to specific expression
 function ZVM:Dyn_EmitOperand(OP,text,emitNow)
   if not text then
-    print('operand '..OP)
     self.EmitExpression[1] = self:Dyn_PreprocessEmit(OP)
   else
     self.EmitExpression[OP] = self:Dyn_PreprocessEmit(text)
@@ -427,7 +423,6 @@ function ZVM:Precompile_Fetch()
   self.PrecompileXEIP = self.PrecompileXEIP + 1
   self.PrecompileIP = self.PrecompileIP + 1
   self.PrecompileBytes = self.PrecompileBytes + 1
-  print("fetched "..value)
   return value or 0
 end
 
