@@ -212,7 +212,7 @@ function ENT:ApplyDupeInfo(ply, ent, info, GetEntByID)
   self.RAMSize  = math.Clamp(info.RAMSize or 65536, 0, 2097152)
   self.ChipType = info.ChipType or 0
   self.Memory = {}
-  self.ZVMExtensions = info.ZVMExtensions
+  self:SetExtensionLoadOrder(info.ZVMExtensions)
 
   for address = 0,self.RAMSize-1 do
     if info.Memory[address] then self.Memory[address] = tonumber(info.Memory[address]) or 0 end

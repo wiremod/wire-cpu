@@ -277,8 +277,8 @@ function ENT:ApplyDupeInfo(ply, ent, info, GetEntByID)
 	self.VM.RAMSize  = info.InternalRAMSize or 65536
 	self.VM.ROMSize  = info.InternalROMSize or 65536
 	self:SetCPUName(info.CPUName)
+	self:SetExtensionLoadOrder(info.ZVMExtensions)
 
-	self.ZVMExtensions = info.ZVMExtensions
 
 	if info.Memory then--and
 		 --(((info.UseROM) and (info.UseROM == true)) or

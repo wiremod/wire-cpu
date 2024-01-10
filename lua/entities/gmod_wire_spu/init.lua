@@ -197,6 +197,7 @@ function ENT:BuildDupeInfo()
   info.ChipType = self.ChipType
   info.Memory = {}
   info.ZVMExtensions = self.ZVMExtensions
+  self:SetExtensionLoadOrder(self.ZVMExtensions)
 
   for address = 0,self.RAMSize-1 do
     if self.Memory[address] and (self.Memory[address] ~= 0) then info.Memory[address] = self.Memory[address] end
