@@ -1,0 +1,15 @@
+{
+	"title"		:	"Wire CPU",
+	"type"		:	"ServerContent",
+	"tags"		:	[  ],
+	"ignore"	:
+	[
+		"LICENSE",
+		"README.md",
+		"*.git",
+		"*.github",
+		"*.psd",
+		"*.vcproj",
+		"*.svn*"
+	]
+}
