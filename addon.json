@@ -1,15 +1,19 @@
 {
 	"title"		:	"Wire CPU",
 	"type"		:	"ServerContent",
-	"tags"		:	[  ],
+	"tags"		:	[ "build", "fun" ],
 	"ignore"	:
 	[
-		"LICENSE",
-		"README.md",
-		"*.git",
-		"*.github",
 		"*.psd",
 		"*.vcproj",
-		"*.svn*"
+		"*.xcf",
+		".git*",
+		"*.md",
+		".glualint.json",
+		".github",
+		"git-hooks-pre-commit",
+		"gitrid.sh",
+		"LICENSE",
+		"wiremod.*"
 	]
 }
