@@ -1,6 +1,6 @@
 {
 	"title"		:	"Wire CPU",
-	"type"		:	"ServerContent",
+	"type"		:	"tool",
 	"tags"		:	[ "build", "fun" ],
 	"ignore"	:
 	[
