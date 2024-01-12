@@ -1,0 +1,19 @@
+{
+	"title"		:	"Wire CPU",
+	"type"		:	"tool",
+	"tags"		:	[ "build", "fun" ],
+	"ignore"	:
+	[
+		"*.psd",
+		"*.vcproj",
+		"*.xcf",
+		".git*",
+		"*.md",
+		".glualint.json",
+		".github",
+		"git-hooks-pre-commit",
+		"gitrid.sh",
+		"LICENSE",
+		"wiremod.*"
+	]
+}
