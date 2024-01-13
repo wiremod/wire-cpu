@@ -26,6 +26,11 @@ function ENT:OverrideVM()
     end
   end
 
+  self.VM.Env["surface"] = surface
+  self.VM.Env["GPULib"] = GPULib
+  self.VM.Env["render"] = render
+  self.VM.Env["WireGPU_matBuffer"] = WireGPU_matBuffer
+
   self.VM.ErrorText = {}
   self.VM.ErrorText[2]  = "Program ended unexpectedly"
   self.VM.ErrorText[3]  = "Arithmetic division by zero"
