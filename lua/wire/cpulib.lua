@@ -864,13 +864,79 @@ function CPULib:ParseFlagArray(flags)
   return n
 end
 
+function CPULib:CreateExtension(name, platform)
+  local extension = {Platform = string.upper(platform)}
+  return self:RegisterExtension(name, extension)
+end
+
 function CPULib:RegisterExtension(name, extension)
   if not self.Extensions[extension.Platform] then
     self.Extensions[extension.Platform] = {}
   end
-  if not self.Extensions[extension.Platform][name] then
-    self.Extensions[extension.Platform][name] = extension
+  if self.Extensions[extension.Platform][name] then
+    return false
   end
+  self.Extensions[extension.Platform][name] = extension
+
+  -- Create an instruction with the raw API using arguments
+  function extension:RegisterInstruction(name, opcount, opfunc, flags, docs)
+    local instruction = {
+      Name = name,
+      Operands = opcount,
+      OpFunc = opfunc,
+      Flags = flags,
+      Op1Name = "",
+      Op2Name = ""
+    }
+    if not docs then
+      instruction.Description = "Instruction "..name.." created by extension "..self.Name
+      instruction.Version = 1
+      if opcount > 0 then
+        instruction.Op1Name = "X"
+      end
+      if opcount > 1 then
+        instruction.Op2Name = "Y"
+      end
+    end
+    table.insert(self.Instructions, instruction)
+    return instruction
+  end
+
+  -- Takes a lua function expecting args (VM, operands) where operands is a number-indexed table containing the values
+  -- of the operands used by the function, setting them inside this table will change their values on
+  -- completion of the function (when possible).
+  --
+  -- Return one or two numbers to generate an interrupt.
+  function extension:InstructionFromLuaFunc(name, opcount, luafunc, flags, docs)
+    -- This will need to be compiled at extension load time with $interOpIndex replaced
+    -- by the actual index into the interop function table
+    local opfunc =  [[
+        local args = { ... }
+        local self = args[1]
+        self:Dyn_Emit("$L interOp = {$1 or 0, $2 or 0}")
+        self:Dyn_Emit("$L interOpRet1, interOpRet2 = VM.InterOpFuncs[$interOpIndex](VM,interOp)")
+        self:Dyn_EmitInterruptCheck()
+        self:Dyn_Emit("if interOpRet1 then")
+          self:Dyn_EmitState()
+          self:Emit("VM.IP = %d",(self.PrecompileIP or 0))
+          self:Emit("VM.XEIP = %d",(self.PrecompileTrueXEIP or 0))
+          self:Dyn_Emit("VM:Interrupt(interOpRet1 or 5, interOpRet2 or 0)")
+          self:Dyn_EmitBreak()
+        self:Dyn_Emit("end")
+        self:Dyn_Emit("if $1 ~= interOp[1] then")
+          self:Dyn_EmitOperand(1,"interOp[1]")
+        self:Dyn_Emit("end")
+        self:Dyn_Emit("if $2 ~= interOp[2] then")
+          self:Dyn_EmitOperand(2,"interOp[2]")
+        self:Dyn_Emit("end")
+      ]]
+    local instruction = self:RegisterInstruction(name, opcount, opfunc, flags, docs)
+    instruction.InterOpFunc = luafunc
+  end
+  if not extension.Instructions then
+    extension.Instructions = {}
+  end
+  return extension
 end
 
 -- Rebuilds the instruction table according to the load order
@@ -932,6 +998,7 @@ function CPULib:LoadExtensions(VM, platform)
     return false
   end
   local curInstruction = -1
+  local curInterop = 1
   for _, name in pairs(VM.Extensions) do
     if self.Extensions[platform][name] then
       -- The actual load order is the order that it's in for the VM.
@@ -940,7 +1007,17 @@ function CPULib:LoadExtensions(VM, platform)
         if instr.Privileged then
           VM.ExtOperandRunLevel[curInstruction*-1] = 0
         end
-        VM.OpcodeTable[curInstruction] = instr.OpFunc
+        if instr.InterOpFunc then
+          if not VM.InterOpFuncs then
+            VM.InterOpFuncs = {}
+          end
+          VM.InterOpFuncs[curInterop] = instr.InterOpFunc
+          local finalOpFunc = string.gsub(instr.OpFunc, "$interOpIndex", curInterop)
+          VM.OpcodeTable[curInstruction] = CompileString(finalOpFunc)
+          curInterop = curInterop + 1
+        else
+          VM.OpcodeTable[curInstruction] = instr.OpFunc
+        end
         curInstruction = curInstruction - 1
       end
     else
