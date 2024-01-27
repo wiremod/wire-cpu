@@ -704,7 +704,29 @@ end
 
 -- Any library that's needed by the entirety of the ZVM instruction set should go here
 -- Platform dependant libraries(GPU or SPU for example) should be added to the env by the platform
-ZVM.Env = {["math"]=math, ["string"]=string, ["bit"]=bit, ["VM"]=ZVM}
+ZVM.Env = {
+  math={
+    Clamp = math.Clamp,
+    floor = math.floor,
+    min = math.min,
+    max = math.max,
+    sqrt = math.sqrt,
+    sin = math.sin,
+    cos = math.cos,
+    pi = math.pi,
+    abs = math.abs,
+    random = math.random
+  },
+  bit={
+    bnot = bit.bnot,
+    band = bit.band,
+    bor = bit.bor,
+    bxor = bit.bxor,
+    lshift = bit.lshift,
+    rshift = bit.rshift
+  },
+  VM = ZVM
+}
 
 
 --------------------------------------------------------------------------------

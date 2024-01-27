@@ -26,9 +26,18 @@ function ENT:OverrideVM()
     end
   end
 
-  self.VM.Env["surface"] = surface
-  self.VM.Env["GPULib"] = GPULib
-  self.VM.Env["render"] = render
+  self.VM.Env["surface"] = {
+    SetTexture = surface.SetTexture,
+    SetDrawColor = surface.SetDrawColor,
+    DrawRect = surface.DrawRect,
+    DrawTexturedRect = surface.DrawTexturedRect
+  }
+  self.VM.Env["GPULib"] = {
+    Material = GPULib.Material
+  }
+  self.VM.Env["render"] = {
+    CopyTexture = render.CopyTexture
+  }
   self.VM.Env["WireGPU_matBuffer"] = WireGPU_matBuffer
 
   self.VM.ErrorText = {}
