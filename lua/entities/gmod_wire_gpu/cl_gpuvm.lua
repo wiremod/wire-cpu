@@ -42,6 +42,8 @@ function ENT:OverrideVM()
     sub = string.sub,
     len = string.len
   }
+  self.VM.Env["tostring"] = tostring
+  self.VM.Env["tonumber"] = tonumber
   self.VM.Env["WireGPU_matBuffer"] = WireGPU_matBuffer
 
   self.VM.ErrorText = {}
