@@ -505,7 +505,6 @@ function HCOMP:Expression_Level1()
 
   local token = self:PeekToken()
   if (token == self.TOKEN.PLUS) then
-    -- Treat "-" as negate instead of subtraction FIXME (FIXED)
     if token == self.TOKEN.PLUS then self:NextToken() end
 
     local rightLeaf = self:Expression_LevelLeaf(0)
