@@ -504,13 +504,18 @@ function HCOMP:Expression_Level1()
   local leftLeaf = self:Expression_LevelLeaf(2)
 
   local token = self:PeekToken()
-  if (token == self.TOKEN.PLUS) or
-     (token == self.TOKEN.MINUS) then -- +-
-    -- Treat "-" as negate instead of subtraction FIXME
+  if (token == self.TOKEN.PLUS) then
+    -- Treat "-" as negate instead of subtraction FIXME (FIXED)
     if token == self.TOKEN.PLUS then self:NextToken() end
 
     local rightLeaf = self:Expression_LevelLeaf(0)
     return self:NewOpcode("add",leftLeaf,rightLeaf)
+  elseif (token == self.TOKEN.MINUS) then 
+  
+    if token == self.TOKEN.MINUS then self:NextToken() end
+
+    local rightLeaf = self:Expression_LevelLeaf(0)
+    return self:NewOpcode("sub",leftLeaf,rightLeaf)
   elseif (token == self.TOKEN.LAND) or
          (token == self.TOKEN.LOR) then -- &&, ||
     self:NextToken()
