@@ -218,8 +218,11 @@ if CLIENT then
       end
       -- Overriding this turns off the automatic convar write, so we have to do it ourselves.
         memoryModel:SetString(data.wire_cpu_memorymodel)
+      -- Rebuild the layout to prevent an unsightly gap
+        panel:InvalidateLayout()
+        panel:InvalidateChildren(true)
     end
-
+    memPanel:OnSelect(0,0,{wire_cpu_memorymodel = memoryModel:GetString()}) -- Simulate one on-select to correct the show/hide status
     local enabledExtensionOrder = {}
     local enabledExtensionLookup = {}
     local extensionConvar = GetConVar("wire_cpu_extensions")
