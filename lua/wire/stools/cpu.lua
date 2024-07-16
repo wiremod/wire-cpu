@@ -205,6 +205,20 @@ if CLIENT then
       panel:AddControl("Slider", {Label = "RAM size", Command = "wire_cpu_customram", Min = 0, Max = 1024}),
       panel:AddControl("Slider", {Label = "ROM size", Command = "wire_cpu_customrom", Min = 0, Max = 1024}),
     }
+    local function formatPageSizeString(pages)
+      if pages >= 8 then
+        return string.format("KB %g",pages/8) -- padding with spaces won't help because the font isn't monospaced
+      else
+        return string.format(" B  %g",pages*128)
+      end
+    end
+    customMemPanel[2].OnValueChanged = function(self,pages)
+      self:SetText("RAM size "..formatPageSizeString(pages))
+    end
+    customMemPanel[3].OnValueChanged = function(self,pages)
+      self:SetText("ROM size "..formatPageSizeString(pages))
+    end
+
     local memoryModel = GetConVar("wire_cpu_memorymodel")
     function memPanel:OnSelect(index, value, data)
       if data.wire_cpu_memorymodel == "custom" then
