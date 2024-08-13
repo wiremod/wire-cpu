@@ -402,7 +402,9 @@ function ZVM:Precompile_Finalize()
   if not result then
     print("[ZVM ERROR]: "..(message or "unknown error"))
   else
-    for address = self.PrecompileStartXEIP, self.PrecompileXEIP-1 do
+    local precompileStartPEIP = (self:GetPageByIndex(math.floor(self.PrecompileStartXEIP/128))+self.PrecompileStartXEIP%128)
+    local precompilePEIP = precompileStartPEIP+(self.PrecompileXEIP-self.PrecompileStartXEIP)
+    for address = precompileStartPEIP, self.precompilePEIP-1 do
       if not self.IsAddressPrecompiled[address] then
         self.IsAddressPrecompiled[address] = { }
       end
@@ -455,9 +457,14 @@ function ZVM:Precompile_Step()
   -- Check if we crossed the page boundary, if so - repeat the check
   if math.floor(self.PrecompileXEIP / 128) ~= self.PrecompilePreviousPage then
     self:Emit("VM:SetCurrentPage(%d)",math.floor(self.PrecompileXEIP/128))
-    self:Emit("if (VM.PCAP == 1) and (VM.CurrentPage.Execute == 0) and")
-    self:Emit("   (VM.PreviousPage.RunLevel ~= 0) then")
-      self:Dyn_EmitInterrupt("14",self.PrecompileIP)
+    self:Emit("if (VM.PCAP == 1) then")
+    self:Emit(" if (VM.CurrentPage.Execute == 0) and (VM.PreviousPage.RunLevel ~= 0) then")
+        self:Dyn_EmitInterrupt("14",self.PrecompileIP)
+      self:Emit("end")
+    local expectedPage = self:GetPageByIndex(self.PrecompileXEIP/128)
+    self:Emit("if VM.CurrentPage.Remapped and if VM.CurrentPage.MappedIndex ~= %d",expectedPage.MappedIndex)
+      self:Emit('print("Unexpected")')
+      self:Dyn_EmitBreak()
     self:Emit("end")
     self:Emit("VM:SetPreviousPage(%d)",math.floor(self.PrecompileXEIP/128))
 
