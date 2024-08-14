@@ -406,7 +406,7 @@ function ZVM:Precompile_Finalize()
     local page = self:GetPageByIndex(math.floor(self.PrecompileStartXEIP/128))
     local precompileStartPEIP = self.PrecompileStartXEIP
     local precompilePEIP = self.PrecompileXEIP
-    if page.Remapped then
+    if page.Remapped == 1 then
       precompileStartPEIP = page.MappedIndex*128+self.PrecompileStartXEIP%128
       precompilePEIP = precompileStartPEIP+(self.PrecompileXEIP-self.PrecompileStartXEIP)
     end
@@ -642,7 +642,7 @@ end
 function ZVM:InvalidateVirtualPrecompileAddress(Address)
   local Page = self:GetPageByIndex(math.floor(Address/128))
   local newAddress = Address
-  if Page.Remapped then
+  if Page.Remapped == 1 then
     Address = (Page.MappedIndex*128)+(Address%128)
   end
   self:InvalidatePrecompileAddress(Address)
@@ -686,7 +686,7 @@ function ZVM:Step(overrideSteps,extraEmitFunction)
   end
 
   local address = self.XEIP
-  if self.CurrentPage.Remapped then
+  if self.CurrentPage.Remapped == 1 then
     address = (self.CurrentPage.MappedIndex*128)+(self.XEIP%128)
   end
 
