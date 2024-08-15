@@ -85,7 +85,7 @@ if CLIENT or TESTING then
 
   ------------------------------------------------------------------------------
   -- Make sure the file is opened in the tab
-  function CPULib.SelectTab(editor,fileName,dontSetActive)
+  function CPULib.SelectTab(editor,fileName,dontForceChange)
     if not editor then return end
     local editorType = string.lower(editor.EditorType)
     local fullFileName = editorType.."chip\\"..fileName
@@ -94,6 +94,7 @@ if CLIENT or TESTING then
       fullFileName = fileName
     end
 
+    local currentTab = editor:GetActiveTabIndex()
     local sourceTab
     for tab=1,editor:GetNumTabs() do
       if editor:GetEditor(tab).chosenfile == fullFileName then
@@ -104,8 +105,11 @@ if CLIENT or TESTING then
     if not sourceTab then
       editor:LoadFile(fullFileName,true)
       sourceTab = editor:GetActiveTabIndex()
+      if dontForceChange then
+        editor:SetActiveTab(currentTab)
+      end
     else
-      if not dontSetActive then
+      if not dontForceChange then
         editor:SetActiveTab(sourceTab)
       end
     end
