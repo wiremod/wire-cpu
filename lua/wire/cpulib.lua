@@ -893,7 +893,7 @@ if CLIENT then
       end
     end
     table.insert(CPULib.CreateInstructionHooks,helperCreateInstructionHook)
-    table.insert(CPULib.DestroyInstructionHooks,helperDestroyInstructionHook)
+    table.insert(CPULib.RemoveInstructionHooks,helperDestroyInstructionHook)
     end
   end)
 end
