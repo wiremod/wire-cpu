@@ -16,6 +16,8 @@ ZVMTestSuite = {
 	TestFiles = {},
 	TestQueue = {},
 	TestStatuses = {},
+	Benchmarks = {},
+	BenchmarksByTest = {},
 	Warnings = 0,
 	CurrentWarnings = 0
 }
@@ -52,6 +54,8 @@ end
 function ZVMTestSuite.StartTesting()
 	ZVMTestSuite.TestQueue = {}
 	ZVMTestSuite.TestStatuses = {}
+	ZVMTestSuite.Benchmarks = {}
+	ZVMTestSuite.BenchmarksByTest = {}
 	for ind, i in ipairs(ZVMTestSuite.TestFiles) do -- copy with reversed indexes so we can use cheap popping
 		ZVMTestSuite.TestQueue[(#ZVMTestSuite.TestFiles)+1-ind] = i
 	end
@@ -66,12 +70,17 @@ function ZVMTestSuite.FinishTest(fail)
 	else
 		finalFail = fail
 	end
+	local prevTestIndex = #ZVMTestSuite.TestQueue
+	local prevTestName = ZVMTestSuite.TestQueue[prevTestIndex]
 	if ZVMTestSuite.CurrentWarnings > 0 then
-		print("Compiler Warnings from " .. ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] .. ": " .. ZVMTestSuite.CurrentWarnings)
+		print("Compiler Warnings from " .. ZVMTestSuite.TestQueue[prevTestIndex] .. ": " .. ZVMTestSuite.CurrentWarnings)
 		ZVMTestSuite.CurrentWarnings = 0
 	end
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses + 1] = finalFail -- auto fail on return nil
-	ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] = nil
+	if ZVMTestSuite.BenchmarksByTest[prevTestName] then
+		PrintTable(ZVMTestSuite.BenchmarksByTest[prevTestName])
+	end
+	ZVMTestSuite.TestQueue[prevTestIndex] = nil
 	if #ZVMTestSuite.TestQueue > 0 then
 		ZVMTestSuite.RunNextTest()
 	else
@@ -261,6 +270,9 @@ function ZVMTestSuite.AddVirtualFunctions(VM)
 		self.Error = errorcode
 		self.ErrorCallback(errorcode)
 	end
+	function VM:SignalShutdown()
+		self.VMStopped = true
+	end
 end
 
 function ZVMTestSuite.FlashData(VM,data)
@@ -288,11 +300,15 @@ function ZVMTestSuite.Run(VM)
 	local CurrentTime = CurTime()
 	local DeltaTime = math.min(1/30,CurrentTime - (VM.PreviousTime or 0))
 	VM.PreviousTime = CurrentTime
-
 	local Cycles = math.max(1,math.floor(VM.Frequency*DeltaTime*0.5))
+	if VM.ZVMBenchmark then
+		-- Benchmark mode seems to consume twice as many cycles so we have to
+		-- raise the cycle count a bit.
+		Cycles = Cycles * 2
+	end
 	VM.TimerDT = (DeltaTime/Cycles)
 
-	while (Cycles > 0) and (VM.Clk) and (not VMStopped) and (VM.Idle == 0) do
+	while (Cycles > 0) and (VM.Clk) and (not VM.VMStopped) and (VM.Idle == 0) do
 		-- Run VM step
 		local previousTMR = VM.TMR
 		VM:Step()
@@ -393,7 +409,81 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 		VM.VMStopped = false
 		return oldReset(...)
 	end
+	if ZVMTestSuite.BenchmarkConvar:GetBool() then
+		if not VM.ZVMBenchmark then
+			VM.ZVMBenchmark = {
+				PrecompileStringSize = 0, -- Total precompile string size
+				TotalJitBytecodeSize = 0, -- Total jit bytecode compiled
+				BiggestPrecompileStringSize = 0, -- The biggest single precompile string
+				BiggestJitBlock = 0, -- The biggest single block
+				PrecompileSteps = 0, -- Number of steps in precompile
+				Precompiles = 0, -- Number of precompile blocks started / finished
+				FinalCompiledCount = 0, -- Final amount of precompiled blocks at the end of test.
+				ExecutionTime = 0, -- Total execution time during VM:Step
+				LongestStepExecutionTime = 0, -- Longest execution time during VM:Step
+			}
+			
+			table.insert(ZVMTestSuite.Benchmarks,VM.ZVMBenchmark)
+			VM.ZVMBenchmark.ProbableOwner = ZVMTestSuite.TestQueue[#ZVMTestSuite.TestQueue] or "Unknown"
+			if not ZVMTestSuite.BenchmarksByTest[VM.ZVMBenchmark.ProbableOwner] then
+				ZVMTestSuite.BenchmarksByTest[VM.ZVMBenchmark.ProbableOwner] = {}
+			end
+			table.insert(ZVMTestSuite.BenchmarksByTest[VM.ZVMBenchmark.ProbableOwner],VM.ZVMBenchmark)
+		end
+		-- Maybe having a "Longest precompile time" or something would be a good idea too but later.
+		VM.OriginalStep = VM.OriginalStep or VM.Step
+		function VM:Step(overrideSteps,extraEmitFunction)
+			local preStep = os.clock()
+			self:OriginalStep(overrideSteps,extraEmitFunction)
+			local postStep = os.clock()
+			local time = postStep-preStep
+			if time > self.ZVMBenchmark.LongestStepExecutionTime then
+				self.ZVMBenchmark.LongestStepExecutionTime = time
+			end
+			self.ZVMBenchmark.ExecutionTime = self.ZVMBenchmark.ExecutionTime + time
+		end
+		VM.OriginalPrecompile_Step = VM.OriginalPrecompile_Step or VM.Precompile_Step
+		VM.OriginalPrecompile_Finalize = VM.OriginalPrecompile_Finalize or VM.Precompile_Finalize
+		VM.OriginalDyn_EndBlock = VM.OriginalDyn_EndBlock or VM.Dyn_EndBlock
+		function VM:Precompile_Step()
+			self.ZVMBenchmark.PrecompileSteps = self.ZVMBenchmark.PrecompileSteps + 1
+			self:OriginalPrecompile_Step()
+		end
+		function VM:Dyn_EndBlock()
+			local block = self:OriginalDyn_EndBlock()
+			local blocklen = #block
+			if blocklen > self.ZVMBenchmark.BiggestPrecompileStringSize then
+				self.ZVMBenchmark.BiggestPrecompileStringSize = blocklen
+			end
+			self.ZVMBenchmark.PrecompileStringSize = self.ZVMBenchmark.PrecompileStringSize + blocklen
+			return block
+		end
+		function VM:Precompile_Finalize()
+			local precompiledfn = self:OriginalPrecompile_Finalize()
+			local fninfo = jit.util.funcinfo(precompiledfn)
+			if fninfo.bytecodes then
+				if fninfo.bytecodes > self.ZVMBenchmark.BiggestJitBlock then
+					self.ZVMBenchmark.BiggestJitBlock = fninfo.bytecodes
+				end
+				self.ZVMBenchmark.TotalJitBytecodeSize = self.ZVMBenchmark.TotalJitBytecodeSize + fninfo.bytecodes
+			end
+			self.ZVMBenchmark.Precompiles = self.ZVMBenchmark.Precompiles + 1
+			self.ZVMBenchmark.FinalCompiledCount = self.ZVMBenchmark.FinalCompiledCount + 1
+			return precompiledfn
+		end
+		-- Just a copy of the one from the ZVM code directly with logging
+		function VM:InvalidatePrecompileAddress(Address)
+			if self.IsAddressPrecompiled[Address] then
+				self.ZVMBenchmark.FinalCompiledCount = self.ZVMBenchmark.FinalCompiledCount - 1
+				for k,v in ipairs(self.IsAddressPrecompiled[Address]) do
+					self.PrecompiledData[v] = nil
+					self.IsAddressPrecompiled[Address][k] = nil
+				end
+			end
+		end
+	end
 end
 
 
 concommand.Add("ZCPU_RUN_TESTS", ZVMTestSuite.CMDRun, nil, "Runs ZCPU Tests, pass a comma delimited list to only run tests with those names\nExample: ZCPU_RUN_TESTS example,file_example\n\nRun without args to run all tests")
+ZVMTestSuite.BenchmarkConvar = CreateConVar("ZCPU_TESTS_BENCHMARKING",0,0,"Whether or not to record and report benchmarking information for ZVM Tests",0,1)
