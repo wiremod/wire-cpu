@@ -123,7 +123,7 @@ if CLIENT then
   function ZCPU_OpenEditor()
     if not ZCPU_Editor then
       ZCPU_Editor = vgui.Create("Expression2EditorFrame")
-      ZCPU_Editor:Setup("ZCPU Editor", "cpuchip", "CPU")
+      CPULib.SetupEditor(ZCPU_Editor,"ZCPU Editor", "cpuchip", "CPU")
     end
     ZCPU_Editor:Open()
   end
@@ -148,7 +148,7 @@ if CLIENT then
     function FileBrowser:OnFileOpen(filepath, newtab)
       if not ZCPU_Editor then
         ZCPU_Editor = vgui.Create("Expression2EditorFrame")
-        ZCPU_Editor:Setup("ZCPU Editor", "cpuchip", "CPU")
+        CPULib.SetupEditor(ZCPU_Editor,"ZCPU Editor", "cpuchip", "CPU")
       end
       ZCPU_Editor:Open(filepath, nil, newtab)
     end

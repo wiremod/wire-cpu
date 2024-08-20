@@ -100,7 +100,7 @@ if CLIENT then
   function ZSPU_OpenEditor()
     if not ZSPU_Editor then
       ZSPU_Editor = vgui.Create("Expression2EditorFrame")
-      ZSPU_Editor:Setup("ZSPU Editor", "spuchip", "SPU")
+      CPULib.SetupEditor(ZSPU_Editor,"ZSPU Editor", "spuchip", "SPU")
     end
     ZSPU_Editor:Open()
   end
@@ -132,7 +132,7 @@ if CLIENT then
 	function FileBrowser:OnFileOpen(filepath, newtab)
 	  if not ZSPU_Editor then
         ZSPU_Editor = vgui.Create("Expression2EditorFrame")
-        ZSPU_Editor:Setup("ZSPU Editor", "spuchip", "SPU")
+        CPULib.SetupEditor(ZSPU_Editor,"ZSPU Editor", "spuchip", "SPU")
       end
       ZSPU_Editor:Open(filepath, nil, newtab)
     end

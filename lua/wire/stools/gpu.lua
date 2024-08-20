@@ -102,7 +102,7 @@ if CLIENT then
   function ZGPU_OpenEditor()
     if not ZGPU_Editor then
       ZGPU_Editor = vgui.Create("Expression2EditorFrame")
-      ZGPU_Editor:Setup("ZGPU Editor", "gpuchip", "GPU")
+      CPULib.SetupEditor(ZGPU_Editor,"ZGPU Editor", "gpuchip", "GPU")
     end
     ZGPU_Editor:Open()
   end
@@ -127,7 +127,7 @@ if CLIENT then
     function FileBrowser:OnFileOpen(filepath, newtab)
       if not ZGPU_Editor then
         ZGPU_Editor = vgui.Create("Expression2EditorFrame")
-        ZGPU_Editor:Setup("ZGPU Editor", "gpuchip", "GPU")
+        CPULib.SetupEditor(ZGPU_Editor,"ZGPU Editor", "gpuchip", "GPU")
       end
       ZGPU_Editor:Open(filepath, nil, newtab)
     end
