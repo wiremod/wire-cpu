@@ -78,11 +78,13 @@ function ZVMTestSuite.FinishTest(fail)
 	end
 	ZVMTestSuite.TestStatuses[#ZVMTestSuite.TestStatuses + 1] = finalFail -- auto fail on return nil
 	if ZVMTestSuite.BenchmarksByTest[prevTestName] then
-		PrintTable(ZVMTestSuite.BenchmarksByTest[prevTestName])
+		if ZVMTestSuite.BenchmarkConvar:GetInt() > 1 then
+			PrintTable(ZVMTestSuite.BenchmarksByTest[prevTestName])
+		end
 	end
 	ZVMTestSuite.TestQueue[prevTestIndex] = nil
 	if #ZVMTestSuite.TestQueue > 0 then
-		ZVMTestSuite.RunNextTest()
+		return ZVMTestSuite.RunNextTest()
 	else
 		local passed, failed = 0, 0
 		for ind,i in ipairs(ZVMTestSuite.TestFiles) do
@@ -102,6 +104,33 @@ function ZVMTestSuite.FinishTest(fail)
 		end
 		if ZVMTestSuite.Warnings > 0 then
 			warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings"
+		end
+		-- Sum the benchmarking statistics per each test
+		if ZVMTestSuite.BenchmarkConvar:GetBool() then
+			local sumKeys = {"PrecompileStringSize","TotalJitBytecodeSize","PrecompileSteps","Precompiles","FinalCompiledCount","ExecutionTime"}
+			local topKeys = {"BiggestPrecompileStringSize","BiggestJitBlock","LongestStepExecutionTime"}
+			local FinalBenchmark = {
+				PrecompileStringSize = 0, -- Total precompile string size
+				TotalJitBytecodeSize = 0, -- Total jit bytecode compiled
+				BiggestPrecompileStringSize = 0, -- The biggest single precompile string
+				BiggestJitBlock = 0, -- The biggest single block
+				PrecompileSteps = 0, -- Number of steps in precompile
+				Precompiles = 0, -- Number of precompile blocks started / finished
+				FinalCompiledCount = 0, -- Final amount of precompiled blocks at the end of test.
+				ExecutionTime = 0, -- Total execution time during VM:Step
+				LongestStepExecutionTime = 0, -- Longest execution time during VM:Step
+			}
+			for _,benchmark in ipairs(ZVMTestSuite.Benchmarks) do
+				for _,key in ipairs(sumKeys) do
+					FinalBenchmark[key] = FinalBenchmark[key] + benchmark[key]
+				end
+				for _,key in ipairs(topKeys) do
+					FinalBenchmark[key] = math.max(FinalBenchmark[key],benchmark[key])
+				end
+			end
+			print("\n[Final benchmark stats]\n")
+			PrintTable(FinalBenchmark)
+			print("")
 		end
 		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. warnstring)
 	end
@@ -486,4 +515,4 @@ end
 
 
 concommand.Add("ZCPU_RUN_TESTS", ZVMTestSuite.CMDRun, nil, "Runs ZCPU Tests, pass a comma delimited list to only run tests with those names\nExample: ZCPU_RUN_TESTS example,file_example\n\nRun without args to run all tests")
-ZVMTestSuite.BenchmarkConvar = CreateConVar("ZCPU_TESTS_BENCHMARKING",0,0,"Whether or not to record and report benchmarking information for ZVM Tests",0,1)
+ZVMTestSuite.BenchmarkConvar = CreateConVar("ZCPU_TESTS_BENCHMARKING",0,0,"Whether or not to record and report benchmarking information for ZVM Tests",0,2)
