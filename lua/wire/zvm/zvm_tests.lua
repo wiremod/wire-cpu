@@ -56,6 +56,7 @@ function ZVMTestSuite.StartTesting()
 	ZVMTestSuite.TestStatuses = {}
 	ZVMTestSuite.Benchmarks = {}
 	ZVMTestSuite.BenchmarksByTest = {}
+	ZVMTestSuite.StartTime = os.clock()
 	for ind, i in ipairs(ZVMTestSuite.TestFiles) do -- copy with reversed indexes so we can use cheap popping
 		ZVMTestSuite.TestQueue[(#ZVMTestSuite.TestFiles)+1-ind] = i
 	end
@@ -131,6 +132,7 @@ function ZVMTestSuite.FinishTest(fail)
 			print("")
 		end
 		print(failed .. " Failed test" .. errormod .. ", " ..passed.. " Passed test" ..passmod.. ", " .. warnstring)
+		print("Took "..os.clock()-ZVMTestSuite.StartTime.." to execute tests")
 	end
 end
 
@@ -454,6 +456,7 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 				FinalCompiledCount = 0, -- Final amount of precompiled blocks at the end of test.
 				ExecutionTime = 0, -- Total execution time during VM:Step
 				LongestStepExecutionTime = 0, -- Longest execution time during VM:Step
+				ExecutionSteps = 0, -- How many execution steps were performed by this VM
 			}
 			
 			table.insert(ZVMTestSuite.Benchmarks,VM.ZVMBenchmark)
@@ -474,6 +477,7 @@ function ZVMTestSuite.Initialize(VM,Membus,IOBus)
 				self.ZVMBenchmark.LongestStepExecutionTime = time
 			end
 			self.ZVMBenchmark.ExecutionTime = self.ZVMBenchmark.ExecutionTime + time
+			self.ZVMBenchmark.ExecutionSteps = self.ZVMBenchmark.ExecutionSteps + 1
 		end
 		VM.OriginalPrecompile_Step = VM.OriginalPrecompile_Step or VM.Precompile_Step
 		VM.OriginalPrecompile_Finalize = VM.OriginalPrecompile_Finalize or VM.Precompile_Finalize

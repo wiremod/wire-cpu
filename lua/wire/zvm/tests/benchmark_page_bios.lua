@@ -587,7 +587,7 @@ function Test.Run(CPU,TestSuite)
 	CPU.Frequency = 1e6
 	TestSuite:Deploy(CPU,TestSuite:LoadFile("palloc_spawn_example.txt"),Test.CompileError)
 	CPU.Clk = 1
-	for i = 0, 65536 do
+	for i = 0, 1024*1024 do
 		CPU:RunStep()
 	end
 	-- On false, will cause test to fail with message
