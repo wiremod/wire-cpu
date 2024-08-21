@@ -23,14 +23,20 @@ ZVMTestSuite = {
 }
 
 local testDirectory = "wire/zvm/tests"
+local benchmarkDirectory = testDirectory.."/benchmarks"
 
 function ZVMTestSuite.CMDRun(_, _, _, names)
 	ZVMTestSuite.Warnings = 0
 	ZVMTestSuite.TestFiles = {}
+	local subdirectory = ""
 	for filename in string.gmatch(names, "[^,]+") do
-		local files = file.Find("lua/" .. testDirectory .. "/" .. filename .. ".lua", "GAME")
+		local files  = file.Find("lua/" .. testDirectory .. "/" .. filename .. ".lua", "GAME")
+		if #files == 0 then
+			files = file.Find("lua/" .. benchmarkDirectory .. "/" .. filename .. ".lua", "GAME")
+			subdirectory = "/benchmarks/"
+		end
 			for _, i in ipairs(files) do
-				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = i
+				ZVMTestSuite.TestFiles[#ZVMTestSuite.TestFiles+1] = subdirectory..i
 			end
 	end
 	if #ZVMTestSuite.TestFiles == 0 and names ~= nil then
