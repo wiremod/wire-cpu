@@ -167,10 +167,16 @@ function ZVMTestSuite.RunNextTest()
 end
 
 function ZVMTestSuite:LoadFile(FileName)
-	if ZVMTestSuite.VirtualFiles then
+	if ZVMTestSuite.VirtualFiles and ZVMTestSuite.VirtualFiles[FileName] then
 		return ZVMTestSuite.VirtualFiles[FileName]
 	end
-	return file.Read("lua/" .. testDirectory .. "/" .. FileName, "GAME")
+	local testpath = "lua/" .. testDirectory .. "/" .. FileName
+	local datapath = "data_static/cpuchip/" .. FileName
+	if file.Exists(testpath,"GAME") then
+		return file.Read(testpath,"GAME")
+	elseif file.Exists(datapath,"GAME") then
+		return file.Read(datapath,"GAME")
+	end
 end
 
 function ZVMTestSuite.Compile(SourceCode, FileName, SuccessCallback, ErrorCallback, TargetPlatform)
