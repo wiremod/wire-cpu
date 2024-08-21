@@ -102,9 +102,7 @@ function ZVMTestSuite.FinishTest(fail)
 		if failed ~= 1 then
 			errormod = "s"
 		end
-		if ZVMTestSuite.Warnings > 0 then
-			warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings"
-		end
+		warnstring = ZVMTestSuite.Warnings .. " Compiler Warnings"
 		-- Sum the benchmarking statistics per each test
 		if ZVMTestSuite.BenchmarkConvar:GetBool() then
 			local sumKeys = {"PrecompileStringSize","TotalJitBytecodeSize","PrecompileSteps","Precompiles","FinalCompiledCount","ExecutionTime"}
