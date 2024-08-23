@@ -88,10 +88,11 @@ if CLIENT or TESTING then
   function CPULib.SelectTab(editor,fileName,dontForceChange)
     if not editor then return end
     local editorType = string.lower(editor.EditorType)
-    local fullFileName = editorType.."chip\\"..fileName
-
-    if string.sub(fileName,1,7) == editorType.."chip" then
+    local fullFileName
+    if string.match(fileName,"^"..editor.Location) then
       fullFileName = fileName
+    else
+      fullFileName = editor.Location.."/"..fileName
     end
 
     local currentTab = editor:GetActiveTabIndex()
