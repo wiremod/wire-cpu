@@ -91,7 +91,7 @@ if CLIENT then
   function ZGPU_RequestCode()
     if ZGPU_Editor then
       CPULib.Debugger.SourceTab = ZGPU_Editor:GetActiveTab()
-      CPULib.Compile(ZGPU_Editor:GetCode(),ZGPU_Editor:GetChosenFile(),compile_success,compile_error,"GPU")
+      CPULib.Compile(ZGPU_Editor:GetCode(),ZGPU_Editor:GetChosenFile(),compile_success,compile_error,"GPU",ZGPU_Editor.Location)
     end
   end
   net.Receive("ZGPU_RequestCode", ZGPU_RequestCode)

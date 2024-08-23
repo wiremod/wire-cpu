@@ -45,7 +45,7 @@ if CLIENT or TESTING then
 
   ------------------------------------------------------------------------------
   -- Request compiling specific sourcecode
-  function CPULib.Compile(source,fileName,successCallback,errorCallback,targetPlatform)
+  function CPULib.Compile(source,fileName,successCallback,errorCallback,targetPlatform,sourceDirectory)
     -- Stop any compile/upload process that is running right now
     timer.Remove("cpulib_compile")
     timer.Remove("cpulib_upload")
@@ -72,6 +72,7 @@ if CLIENT or TESTING then
 
     -- Start compiling the sourcecode
     HCOMP.Settings.CurrentPlatform = targetPlatform or "CPU"
+    HCOMP.Location = sourceDirectory or HCOMP.Settings.CurrentPlatform .. "chip"
     print("=== HL-ZASM High Level Assembly Compiler Output ==")
 
     -- Initialize callbacks
@@ -144,7 +145,7 @@ if CLIENT or TESTING then
         end
 
         editor.C.Val:Update({{message = issue, line = line, char = char}}, nil, issue, Color(128, 20, 50))
-      end,editor.EditorType)
+      end,editor.EditorType,editor.Location)
   end
 
   ------------------------------------------------------------------------------
