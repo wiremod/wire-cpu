@@ -542,7 +542,7 @@ function ZVM:Precompile_Step()
   if self.OpcodeRunLevel[Opcode] then
     self:Dyn_BeginUnprivilegedCode(self.OpcodeRunLevel[Opcode])
       self:Dyn_Emit("if VM.PreqHandled == 0 then")
-        self:Dyn_EmitInterrupt(13,Opcode)
+        self:Dyn_EmitUnprivilegedRequestInterrupt(Opcode)
       self:Dyn_Emit("end")
       -- Skip running the privileged code if this was deemed "handled"
       self:Dyn_Emit("VM.PreqHandled = 0")
