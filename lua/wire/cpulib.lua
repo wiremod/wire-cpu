@@ -374,8 +374,12 @@ if CLIENT or TESTING then
     if ZCPU_Editor then
       -- Highlight current position
       local currentPosition = CPULib.Debugger.PositionByPointer[CPULib.Debugger.Variables[CPULib.Debugger.PreferredTracker or "IP"]]
-
       if currentPosition then
+        -- Check if currentposition is even in the correct editor first, when switching editors CPULib's debugging info switches
+        -- to the file in the new editor.
+        if not currentPosition.File:sub(1,9):match("cpuchip/") then
+          return
+        end
         -- Clear all highlighted lines
         for tab=1,ZCPU_Editor:GetNumTabs() do
           ZCPU_Editor:GetEditor(tab):ClearHighlightedLines()
