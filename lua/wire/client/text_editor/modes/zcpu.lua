@@ -199,7 +199,7 @@ function EDITOR:SyntaxColorLine(row)
     if self:NextPattern(".-%*/") then
       self.blockcomment = nil
     else
-      self:NextPattern(".*") 
+      self:NextPattern(".*")
     end
 
     cols[#cols + 1] = {self.tokendata, colors["comment"]}
