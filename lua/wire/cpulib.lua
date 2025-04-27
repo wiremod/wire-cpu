@@ -482,7 +482,7 @@ if CLIENT or TESTING then
     browser:SetPos(10, 25)
     browser:SetSize(w - 20, h - 35)
 
-    browser:OpenURL("https://wiremod.github.io/Miscellaneous/zcpudoc.html"..bookmarks[bookmark])
+    browser:OpenURL("https://wiremod.github.io/Miscellaneous/zcpudoc.html"..(bookmarks[bookmark] or ""))
   end
 end
 
