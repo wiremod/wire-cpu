@@ -565,6 +565,34 @@ if SERVER then
   -- Players and corresponding entities (for the debugger)
   CPULib.DebuggerData = {}
 
+
+  ------------------------------------------------------------------------------
+  -- Detach debugger
+  function CPULib.DetachDebugger(player)
+    if not IsValid(player) then return end
+
+    local data = CPULib.DebuggerData[player:UserID()]
+    if not data then return end
+
+    local ent = data.Entity
+    if IsValid(ent) and ent.VM then
+      ent.BreakpointInstructions = nil
+
+      if ent.VM.BaseJump then
+        ent.VM.Jump = ent.VM.BaseJump
+        ent.VM.BaseJump = nil
+      end
+
+      if ent.VM.BaseInterrupt then
+        ent.VM.Interrupt = ent.VM.BaseInterrupt
+        ent.VM.BaseInterrupt = nil
+      end
+    end
+
+    CPULib.DebuggerData[player:UserID()] = nil
+  end
+
+
   ------------------------------------------------------------------------------
   -- Attach a debugger
   function CPULib.AttachDebugger(entity,player)
