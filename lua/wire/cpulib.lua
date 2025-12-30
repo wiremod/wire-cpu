@@ -589,6 +589,10 @@ if SERVER then
       end
     end
 
+    net.Start("CPULib.InvalidateDebugger")
+      net.WriteUInt(1, 2) -- 1 = detach
+    net.Send(player)
+
     CPULib.DebuggerData[player:UserID()] = nil
   end
 
