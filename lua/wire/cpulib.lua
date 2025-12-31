@@ -589,9 +589,7 @@ if SERVER then
       end
     end
 
-    net.Start("CPULib.InvalidateDebugger")
-      net.WriteUInt(1, 2) --// 1 = detach
-    net.Send(player)
+
 
     CPULib.DebuggerData[player:UserID()] = nil
   end
@@ -610,10 +608,11 @@ if SERVER then
 
     if not IsValid(entity) or not entity.VM then return end
 
-    -- Detach any existing debugger first
+    
+    --// detach any existing debugger first
     CPULib.DetachDebugger(player)
 
-    -- Hook entity removal so debugger disables itself
+   
     if not entity._CPULibDebuggerHooked then
       entity._CPULibDebuggerHooked = true
 
@@ -625,14 +624,20 @@ if SERVER then
 
         if IsValid(player) then
           CPULib.DetachDebugger(player)
+
+          net.Start("CPULib.InvalidateDebugger")
+            net.WriteUInt(1, 2) --// 1 = detach
+          net.Send(player)
         end
       end
     end
 
     entity.BreakpointInstructions = {}
+
     entity.OnBreakpointInstruction = function(IP)
       local data = CPULib.DebuggerData[player:UserID()]
       if not data then return end
+
       CPULib.SendDebugData(entity.VM, data.MemPointers, player)
     end
 
@@ -661,6 +666,7 @@ if SERVER then
       entity.VM.BaseInterrupt = entity.VM.Interrupt
       entity.VM.Interrupt = function(VM, interruptNo, interruptParameter, isExternal, cascadeInterrupt)
         VM:BaseInterrupt(interruptNo, interruptParameter, isExternal, cascadeInterrupt)
+
         if interruptNo < 27 then
           CPULib.DebugLogInterrupt(player, interruptNo, interruptParameter, isExternal, cascadeInterrupt)
 
