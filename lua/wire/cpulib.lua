@@ -566,7 +566,7 @@ if SERVER then
   CPULib.DebuggerData = {}
 
 
-  ------------------------------------------------------------------------------
+  ----------------------------------------------------------------------
   -- Detach debugger
   function CPULib.DetachDebugger(player)
     if not IsValid(player) then return end
@@ -577,6 +577,9 @@ if SERVER then
     local ent = data.Entity
     if IsValid(ent) and ent.VM then
       ent.BreakpointInstructions = nil
+      ent.OnBreakpointInstruction = nil
+      ent.OnVMStep = nil
+
 
       if ent.VM.BaseJump then
         ent.VM.Jump = ent.VM.BaseJump
@@ -587,15 +590,24 @@ if SERVER then
         ent.VM.Interrupt = ent.VM.BaseInterrupt
         ent.VM.BaseInterrupt = nil
       end
+      
+      if ent._CPULibDebuggerHooked then
+        ent._CPULibDebuggerHooked = nil
+        
+        if ent._CPULibOriginalOnRemove then
+          ent.OnRemove = ent._CPULibOriginalOnRemove
+          ent._CPULibOriginalOnRemove = nil
+        else
+          ent.OnRemove = nil
+        end
+      end
     end
-
-
 
     CPULib.DebuggerData[player:UserID()] = nil
   end
 
 
-  ------------------------------------------------------------------------------
+  ----------------------------------------------------------------------
   -- Attach a debugger
   function CPULib.AttachDebugger(entity, player)
     if not IsValid(player) then return end
@@ -612,17 +624,20 @@ if SERVER then
     --// detach any existing debugger first
     CPULib.DetachDebugger(player)
 
-   
+  
     if not entity._CPULibDebuggerHooked then
       entity._CPULibDebuggerHooked = true
 
-      local oldOnRemove = entity.OnRemove
+      entity._CPULibOriginalOnRemove = entity.OnRemove
+      
       entity.OnRemove = function(ent)
-        if oldOnRemove then
-          oldOnRemove(ent)
+        if entity._CPULibOriginalOnRemove then
+          entity._CPULibOriginalOnRemove(ent)
         end
 
         if IsValid(player) then
+          if not CPULib.DebuggerData[player:UserID()] then return end 
+          
           CPULib.DetachDebugger(player)
 
           net.Start("CPULib.InvalidateDebugger")
