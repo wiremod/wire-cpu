@@ -1,3 +1,6 @@
+# NOTICE: ZCPU HAS BEEN MERGED BACK INTO MAINLINE WIRE WHERE IT WILL CONTINUE TO BE UPDATED AND MAINTAINED. THIS REPOSITORY IS NOW ARCHIVED.
+
+
 # Wire-CPU [![License](https://img.shields.io/github/license/wiremod/wire?color=red)](LICENSE) [![Discord](https://img.shields.io/discord/231131817640460288?label=Discord&logo=discord&logoColor=ffffff&labelColor=7289DA&color=2c2f33)](https://discord.gg/H8UKY3Y)
 
 This repository contains an isolated version of the CPU/GPU/SPU, which were previously included into base [wiremod](https://github.com/wiremod/wire).
